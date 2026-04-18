@@ -11,10 +11,11 @@
             --text-main: #1d1d1f;
             --text-muted: #86868b;
             --primary: #007aff;
-            --primary-hover: #0056b3;
             --border: #e5e5ea;
             --shadow: 0 4px 12px rgba(0,0,0,0.05);
             --danger: #ff3b30;
+            --user-msg: #007aff;
+            --ai-msg: #e5e5ea;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -26,6 +27,8 @@
                 --primary: #0a84ff;
                 --border: #38383a;
                 --shadow: 0 4px 12px rgba(0,0,0,0.2);
+                --user-msg: #0a84ff;
+                --ai-msg: #2c2c2e;
             }
         }
 
@@ -33,188 +36,96 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            padding-bottom: 80px; /* Space for FAB */
+            margin: 0; padding: 0; padding-bottom: 80px;
             transition: background-color 0.3s;
         }
 
-        /* Header & Search */
         header {
-            background-color: var(--card-bg);
-            padding: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background-color: var(--card-bg); padding: 20px;
+            position: sticky; top: 0; z-index: 100;
             border-bottom: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            display: flex; flex-direction: column; gap: 15px;
         }
         
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header-actions { display: flex; gap: 15px; }
         h1 { margin: 0; font-size: 1.5rem; font-weight: 700; }
         
         .icon-btn {
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
+            background: var(--bg-color); border: none; border-radius: 50%;
+            width: 40px; height: 40px; font-size: 1.2rem;
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
         }
 
         .search-bar {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-size: 1rem;
-            box-sizing: border-box;
-            outline: none;
+            width: 100%; padding: 12px 15px; border-radius: 12px;
+            border: 1px solid var(--border); background-color: var(--bg-color);
+            color: var(--text-main); font-size: 1rem; box-sizing: border-box; outline: none;
         }
-        .search-bar:focus { border-color: var(--primary); }
 
-        /* Main Content */
         .container { padding: 15px; max-width: 600px; margin: 0 auto; }
 
-        /* Cards */
         .entry-card {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid var(--border);
+            background-color: var(--card-bg); border-radius: 16px;
+            padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+            cursor: pointer; border: 1px solid var(--border);
         }
-        .entry-card:active { transform: scale(0.98); }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        .card-header { display: flex; justify-content: space-between; align-items: center; }
         .entry-title { font-size: 1.25rem; font-weight: 600; }
-        .entry-type { 
-            font-size: 0.75rem; 
-            text-transform: uppercase; 
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: 0.5px;
-        }
+        .entry-type { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--primary); }
+        .action-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
         
-        .card-actions { display: flex; gap: 10px; }
-        .action-btn {
-            background: var(--bg-color);
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            cursor: pointer;
-            color: var(--text-main);
-        }
-
-        /* Expandable Content */
         .entry-content {
-            display: none;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: var(--text-muted);
-            white-space: pre-wrap;
-            animation: fadeIn 0.3s ease-in-out;
+            display: none; margin-top: 15px; padding-top: 15px;
+            border-top: 1px solid var(--border); font-size: 0.95rem;
+            line-height: 1.6; color: var(--text-muted); white-space: pre-wrap;
         }
         .entry-card.expanded .entry-content { display: block; }
         
         .delete-btn {
-            width: 100%;
-            padding: 10px;
-            margin-top: 15px;
-            background-color: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
+            width: 100%; padding: 10px; margin-top: 15px; background: transparent;
+            color: var(--danger); border: 1px solid var(--danger); border-radius: 8px; font-weight: 600;
         }
 
-        /* Floating Action Button */
         .fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4);
-            cursor: pointer;
-            z-index: 1000;
-            transition: transform 0.2s;
+            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
+            background-color: var(--primary); color: white; border-radius: 30px;
+            display: flex; justify-content: center; align-items: center; font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4); cursor: pointer; z-index: 100;
         }
-        .fab:active { transform: scale(0.9); }
 
-        /* Modals */
+        /* Modals & Chat */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; padding: 20px;
         }
         .modal {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 400px;
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: var(--card-bg); width: 100%; max-width: 400px;
+            border-radius: 20px; padding: 24px; max-height: 90vh; display: flex; flex-direction: column;
         }
-        .modal h3 { margin-top: 0; margin-bottom: 20px; }
         
-        .input-group { margin-bottom: 15px; }
+        /* Chat Specific Styles */
+        #chatModal .modal { height: 80vh; max-width: 500px; padding: 15px; }
+        #chatBox {
+            flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+            margin-bottom: 15px; padding-right: 5px;
+        }
+        .chat-msg { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 0.95rem; line-height: 1.4; }
+        .msg-ai { background-color: var(--ai-msg); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-user { background-color: var(--user-msg); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; padding: 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); outline: none;}
+        .chat-input-area button { background: var(--primary); color: white; border: none; border-radius: 20px; padding: 0 20px; font-weight: bold; }
+
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;}
         .input-group input, .input-group select {
-            width: 100%; padding: 12px; border-radius: 10px;
-            border: 1px solid var(--border); background: var(--bg-color);
-            color: var(--text-main); font-size: 1rem; box-sizing: border-box;
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+            background: var(--bg-color); color: var(--text-main); font-size: 1rem; box-sizing: border-box; margin-bottom: 15px;
         }
-        
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn {
-            flex: 1; padding: 14px; border-radius: 10px; border: none;
-            font-weight: 600; font-size: 1rem; cursor: pointer;
-        }
+        .modal-btns { display: flex; gap: 10px; margin-top: auto; }
+        .btn { flex: 1; padding: 14px; border-radius: 10px; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; }
         .btn-cancel { background: var(--bg-color); color: var(--text-main); }
         .btn-primary { background: var(--primary); color: white; }
-        
-        #loading { display: none; text-align: center; color: var(--primary); font-size: 0.9rem; margin-top: 15px; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -222,13 +133,15 @@
     <header>
         <div class="header-top">
             <h1>Vault</h1>
-            <button class="icon-btn" onclick="openModal('settingsModal')">⚙️</button>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="openChatTutor()" title="Tutor Mode">🧠</button>
+                <button class="icon-btn" onclick="openModal('settingsModal')" title="Settings">⚙️</button>
+            </div>
         </div>
         <input type="text" class="search-bar" id="searchInput" placeholder="Search words or quotes..." onkeyup="filterEntries()">
     </header>
 
     <div class="container" id="entriesList"></div>
-
     <div class="fab" onclick="openModal('addModal')">+</div>
 
     <div class="modal-overlay" id="settingsModal">
@@ -256,12 +169,10 @@
                     <option value="phrase">Phrase</option>
                     <option value="quote">Quotation</option>
                 </select>
-            </div>
-            <div class="input-group">
                 <label>Text</label>
                 <input type="text" id="inputText" placeholder="Enter text here...">
             </div>
-            <div id="loading">Generating context...</div>
+            <div id="loading" style="display:none; color:var(--primary); text-align:center; margin-bottom:10px;">Generating context...</div>
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal('addModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="addEntry()">Generate</button>
@@ -269,7 +180,23 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="chatModal">
+        <div class="modal">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
+                <h3 style="margin:0;">AI Tutor</h3>
+                <button onclick="closeModal('chatModal')" style="background:none; border:none; font-size:1.5rem; color:var(--text-main); cursor:pointer;">&times;</button>
+            </div>
+            <div id="chatBox"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type your answer..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let chatHistory = [];
+
         document.addEventListener('DOMContentLoaded', () => {
             const savedKey = localStorage.getItem('geminiApiKey');
             if (savedKey) {
@@ -279,32 +206,19 @@
             renderEntries();
         });
 
-        // Modal Logic
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        // UI Interactions
-        function toggleCard(element) {
-            element.classList.toggle('expanded');
-        }
-
-        function speakText(event, text) {
-            event.stopPropagation(); // Prevent card from expanding when clicking audio
-            const utterance = new SpeechSynthesisUtterance(text);
-            window.speechSynthesis.speak(utterance);
-        }
+        function toggleCard(element) { element.classList.toggle('expanded'); }
+        function speakText(event, text) { event.stopPropagation(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
 
         function filterEntries() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.entry-card');
-            cards.forEach(card => {
+            document.querySelectorAll('.entry-card').forEach(card => {
                 const text = card.querySelector('.entry-title').innerText.toLowerCase();
-                if (text.includes(query)) card.style.display = 'block';
-                else card.style.display = 'none';
+                card.style.display = text.includes(query) ? 'block' : 'none';
             });
         }
 
-        // Core App Logic
         function saveApiKey() {
             const key = document.getElementById('apiKey').value.trim();
             if (key) {
@@ -318,18 +232,11 @@
         async function getWorkingModel(apiKey) {
             let cachedModel = localStorage.getItem('workingGeminiModel');
             if (cachedModel) return cachedModel;
-
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
             const data = await response.json();
             if (data.error) throw new Error(data.error.message);
-
             const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes("generateContent"));
-            if (!validModels.length) throw new Error("No compatible models found.");
-
-            const preferred = validModels.find(m => m.name.includes("3-flash")) || 
-                              validModels.find(m => m.name.includes("2.5-flash")) || 
-                              validModels.find(m => m.name.includes("flash")) || validModels[0];
-
+            const preferred = validModels.find(m => m.name.includes("3-flash")) || validModels.find(m => m.name.includes("2.5-flash")) || validModels[0];
             localStorage.setItem('workingGeminiModel', preferred.name);
             return preferred.name;
         }
@@ -339,37 +246,27 @@
             const type = document.getElementById('inputType').value;
             const apiKey = localStorage.getItem('geminiApiKey');
 
-            if (!text) { alert("Please enter text."); return; }
-            if (!apiKey) { alert("Please set your API key in settings."); openModal('settingsModal'); return; }
+            if (!text) return alert("Please enter text.");
+            if (!apiKey) return openModal('settingsModal');
 
             document.getElementById('loading').style.display = 'block';
 
             try {
                 const modelName = await getWorkingModel(apiKey);
-                const prompt = `Act as an expert language teacher and media analyst. The user provided this ${type}: "${text}". Briefly define it, explain its significance or nuance, and provide 2 excellent real-world examples of its usage. Keep formatting extremely clean and easy to read.`;
-
+                const prompt = `Act as an expert language teacher. User provided this ${type}: "${text}". Define it, explain nuance, and provide 2 real-world examples. Keep formatting extremely clean.`;
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
-
                 const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-
                 const contextResult = data.candidates[0].content.parts[0].text;
                 saveToStorage(text, type, contextResult);
-                
                 document.getElementById('inputText').value = '';
                 closeModal('addModal');
                 renderEntries();
-                document.getElementById('searchInput').value = ''; // Reset search
             } catch (error) {
-                localStorage.removeItem('workingGeminiModel');
                 alert("Error: " + error.message);
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
+            } finally { document.getElementById('loading').style.display = 'none'; }
         }
 
         function saveToStorage(text, type, context) {
@@ -380,7 +277,7 @@
 
         function deleteEntry(event, id) {
             event.stopPropagation();
-            if(confirm("Are you sure you want to delete this?")) {
+            if(confirm("Delete this item?")) {
                 let entries = JSON.parse(localStorage.getItem('vocabVault')) || [];
                 entries = entries.filter(entry => entry.id !== id);
                 localStorage.setItem('vocabVault', JSON.stringify(entries));
@@ -391,29 +288,95 @@
         function renderEntries() {
             const entriesList = document.getElementById('entriesList');
             let entries = JSON.parse(localStorage.getItem('vocabVault')) || [];
-            
-            if (entries.length === 0) {
-                entriesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); margin-top: 50px;">Your vault is empty. Tap the + button to add your first item.</div>`;
-                return;
-            }
-
+            if (entries.length === 0) return entriesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); margin-top: 50px;">Vault is empty. Tap + to add.</div>`;
             entriesList.innerHTML = entries.map(entry => `
                 <div class="entry-card" onclick="toggleCard(this)">
                     <div class="card-header">
-                        <div>
-                            <div class="entry-type">${entry.type}</div>
-                            <div class="entry-title">${entry.text}</div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="action-btn" onclick="speakText(event, '${entry.text.replace(/'/g, "\\'")}')">🔊</button>
-                        </div>
+                        <div><div class="entry-type">${entry.type}</div><div class="entry-title">${entry.text}</div></div>
+                        <button class="action-btn" onclick="speakText(event, '${entry.text.replace(/'/g, "\\'")}')">🔊</button>
                     </div>
-                    <div class="entry-content">
-                        ${entry.context}
-                        <button class="delete-btn" onclick="deleteEntry(event, ${entry.id})">Remove from Vault</button>
-                    </div>
+                    <div class="entry-content">${entry.context}<button class="delete-btn" onclick="deleteEntry(event, ${entry.id})">Remove</button></div>
                 </div>
             `).join('');
+        }
+
+        // --- AI Tutor Chat Logic ---
+        async function openChatTutor() {
+            const apiKey = localStorage.getItem('geminiApiKey');
+            let entries = JSON.parse(localStorage.getItem('vocabVault')) || [];
+            if (!apiKey) return openModal('settingsModal');
+            if (entries.length === 0) return alert("Add some words to your vault first so the tutor can quiz you!");
+
+            openModal('chatModal');
+            const chatBox = document.getElementById('chatBox');
+            
+            // Only start a new chat if we haven't already
+            if (chatHistory.length === 0) {
+                chatBox.innerHTML = '<div class="chat-msg msg-ai">Setting up your quiz...</div>';
+                
+                // Create a list of the user's words to feed to the AI
+                const wordList = entries.map(e => e.text).join(', ');
+                
+                // The secret system instruction
+                const systemPrompt = `You are a friendly gamified language tutor. The user is trying to learn these items: [${wordList}]. Start the conversation by warmly welcoming them to the practice session. Then, pick ONE item from the list and test them. You can ask for a definition, or give them an example sentence with a blank. Wait for their answer. Evaluate it gently, and move to the next item. Keep responses short and conversational.`;
+                
+                chatHistory = [{ role: 'user', parts: [{ text: systemPrompt }] }];
+                
+                try {
+                    const modelName = await getWorkingModel(apiKey);
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: chatHistory })
+                    });
+                    const data = await response.json();
+                    const aiReply = data.candidates[0].content.parts[0].text;
+                    
+                    chatHistory.push({ role: 'model', parts: [{ text: aiReply }] });
+                    chatBox.innerHTML = `<div class="chat-msg msg-ai">${aiReply}</div>`;
+                } catch (e) {
+                    chatBox.innerHTML = `<div class="chat-msg msg-ai" style="color:var(--danger)">Connection error.</div>`;
+                    chatHistory = []; // Reset on fail
+                }
+            }
+        }
+
+        async function sendChatMessage() {
+            const inputField = document.getElementById('chatInput');
+            const userText = inputField.value.trim();
+            if (!userText) return;
+            
+            const chatBox = document.getElementById('chatBox');
+            const apiKey = localStorage.getItem('geminiApiKey');
+            
+            // Render user message immediately
+            chatBox.innerHTML += `<div class="chat-msg msg-user">${userText}</div>`;
+            inputField.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            chatHistory.push({ role: 'user', parts: [{ text: userText }] });
+
+            // Add typing indicator
+            const typingId = 'typing-' + Date.now();
+            chatBox.innerHTML += `<div id="${typingId}" class="chat-msg msg-ai">...</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const modelName = await getWorkingModel(apiKey);
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: chatHistory })
+                });
+                const data = await response.json();
+                const aiReply = data.candidates[0].content.parts[0].text;
+                
+                document.getElementById(typingId).remove();
+                chatHistory.push({ role: 'model', parts: [{ text: aiReply }] });
+                chatBox.innerHTML += `<div class="chat-msg msg-ai">${aiReply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (e) {
+                document.getElementById(typingId).innerText = "Error getting response.";
+                chatHistory.pop(); // Remove the failed user message from memory
+            }
         }
     </script>
 </body>
