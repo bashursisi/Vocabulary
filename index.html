@@ -197,6 +197,9 @@
     <script>
         let chatHistory = [];
 
+        // Pre-load voices for the browser
+        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+
         document.addEventListener('DOMContentLoaded', () => {
             const savedKey = localStorage.getItem('geminiApiKey');
             if (savedKey) {
@@ -209,7 +212,27 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function toggleCard(element) { element.classList.toggle('expanded'); }
-        function speakText(event, text) { event.stopPropagation(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+
+        function speakText(event, text) {
+            event.stopPropagation();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+
+            // Hunt for highest quality voices
+            const bestVoice = voices.find(v => v.name.includes('Premium') || v.name.includes('Enhanced'))
+                           || voices.find(v => v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel'))
+                           || voices.find(v => v.lang.startsWith('en-'));
+
+            if (bestVoice) {
+                utterance.voice = bestVoice;
+            }
+
+            // Tweak cadence for a more natural feel
+            utterance.rate = 0.95; 
+            utterance.pitch = 1.05;
+
+            window.speechSynthesis.speak(utterance);
+        }
 
         function filterEntries() {
             const query = document.getElementById('searchInput').value.toLowerCase();
@@ -310,14 +333,11 @@
             openModal('chatModal');
             const chatBox = document.getElementById('chatBox');
             
-            // Only start a new chat if we haven't already
             if (chatHistory.length === 0) {
                 chatBox.innerHTML = '<div class="chat-msg msg-ai">Setting up your quiz...</div>';
                 
-                // Create a list of the user's words to feed to the AI
                 const wordList = entries.map(e => e.text).join(', ');
                 
-                // The secret system instruction
                 const systemPrompt = `You are a friendly gamified language tutor. The user is trying to learn these items: [${wordList}]. Start the conversation by warmly welcoming them to the practice session. Then, pick ONE item from the list and test them. You can ask for a definition, or give them an example sentence with a blank. Wait for their answer. Evaluate it gently, and move to the next item. Keep responses short and conversational.`;
                 
                 chatHistory = [{ role: 'user', parts: [{ text: systemPrompt }] }];
@@ -335,7 +355,7 @@
                     chatBox.innerHTML = `<div class="chat-msg msg-ai">${aiReply}</div>`;
                 } catch (e) {
                     chatBox.innerHTML = `<div class="chat-msg msg-ai" style="color:var(--danger)">Connection error.</div>`;
-                    chatHistory = []; // Reset on fail
+                    chatHistory = []; 
                 }
             }
         }
@@ -348,14 +368,12 @@
             const chatBox = document.getElementById('chatBox');
             const apiKey = localStorage.getItem('geminiApiKey');
             
-            // Render user message immediately
             chatBox.innerHTML += `<div class="chat-msg msg-user">${userText}</div>`;
             inputField.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
             chatHistory.push({ role: 'user', parts: [{ text: userText }] });
 
-            // Add typing indicator
             const typingId = 'typing-' + Date.now();
             chatBox.innerHTML += `<div id="${typingId}" class="chat-msg msg-ai">...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -375,7 +393,7 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
             } catch (e) {
                 document.getElementById(typingId).innerText = "Error getting response.";
-                chatHistory.pop(); // Remove the failed user message from memory
+                chatHistory.pop(); 
             }
         }
     </script>
