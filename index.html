@@ -3,125 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contextual Vault</title>
+    <title>Context Vault</title>
     <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+            --primary: #007aff;
+            --primary-hover: #0056b3;
+            --border: #e5e5ea;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --danger: #ff3b30;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --card-bg: #1c1c1e;
+                --text-main: #f5f5f7;
+                --text-muted: #98989d;
+                --primary: #0a84ff;
+                --border: #38383a;
+                --shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+        }
+
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px; /* Space for FAB */
+            transition: background-color 0.3s;
+        }
+
+        /* Header & Search */
+        header {
+            background-color: var(--card-bg);
             padding: 20px;
-            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-        h2 { text-align: center; color: #2c3e50; }
-        .section {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        input, select, button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
+
+        h1 { margin: 0; font-size: 1.5rem; font-weight: 700; }
+        
+        .icon-btn {
+            background: none;
             border: none;
+            color: var(--primary);
+            font-size: 1.5rem;
             cursor: pointer;
-            font-weight: bold;
-            margin-top: 15px;
+            padding: 5px;
         }
-        button:hover { background-color: #2980b9; }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .search-bar:focus { border-color: var(--primary); }
+
+        /* Main Content */
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+
+        /* Cards */
         .entry-card {
-            background: white;
-            padding: 15px;
-            border-left: 5px solid #3498db;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid var(--border);
         }
-        .entry-title { font-weight: bold; font-size: 1.2em; margin-bottom: 5px; }
-        .entry-type { font-size: 0.8em; color: #7f8c8d; text-transform: uppercase; }
-        .entry-context { margin-top: 10px; white-space: pre-wrap; font-size: 0.95em; line-height: 1.5; }
-        .delete-btn { background-color: #e74c3c; margin-top: 10px; padding: 8px; }
-        #loading { display: none; text-align: center; color: #3498db; font-weight: bold; margin-top: 10px; }
+        .entry-card:active { transform: scale(0.98); }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .entry-title { font-size: 1.25rem; font-weight: 600; }
+        .entry-type { 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+        
+        .card-actions { display: flex; gap: 10px; }
+        .action-btn {
+            background: var(--bg-color);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* Expandable Content */
+        .entry-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            white-space: pre-wrap;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .entry-card.expanded .entry-content { display: block; }
+        
+        .delete-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+        .fab:active { transform: scale(0.9); }
+
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal h3 { margin-top: 0; margin-bottom: 20px; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;}
+        .input-group input, .input-group select {
+            width: 100%; padding: 12px; border-radius: 10px;
+            border: 1px solid var(--border); background: var(--bg-color);
+            color: var(--text-main); font-size: 1rem; box-sizing: border-box;
+        }
+        
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn {
+            flex: 1; padding: 14px; border-radius: 10px; border: none;
+            font-weight: 600; font-size: 1rem; cursor: pointer;
+        }
+        .btn-cancel { background: var(--bg-color); color: var(--text-main); }
+        .btn-primary { background: var(--primary); color: white; }
+        
+        #loading { display: none; text-align: center; color: var(--primary); font-size: 0.9rem; margin-top: 15px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <h2>My Context Vault</h2>
+    <header>
+        <div class="header-top">
+            <h1>Vault</h1>
+            <button class="icon-btn" onclick="openModal('settingsModal')">⚙️</button>
+        </div>
+        <input type="text" class="search-bar" id="searchInput" placeholder="Search words or quotes..." onkeyup="filterEntries()">
+    </header>
 
-    <div class="section" id="settingsSection">
-        <label for="apiKey"><strong>1. Set AI API Key</strong></label>
-        <input type="password" id="apiKey" placeholder="Enter Gemini API Key...">
-        <button onclick="saveApiKey()">Save Key</button>
-        <div id="keyStatus" style="font-size: 0.8em; margin-top: 5px; color: green;"></div>
+    <div class="container" id="entriesList"></div>
+
+    <div class="fab" onclick="openModal('addModal')">+</div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <h3>Settings</h3>
+            <div class="input-group">
+                <label>Gemini API Key</label>
+                <input type="password" id="apiKey" placeholder="Paste key here...">
+            </div>
+            <div id="keyStatus" style="font-size: 0.8rem; color: #34c759; margin-bottom: 15px;"></div>
+            <div class="modal-btns">
+                <button class="btn btn-cancel" onclick="closeModal('settingsModal')">Close</button>
+                <button class="btn btn-primary" onclick="saveApiKey()">Save</button>
+            </div>
+        </div>
     </div>
 
-    <div class="section">
-        <label for="inputText"><strong>2. Add New Item</strong></label>
-        <input type="text" id="inputText" placeholder="Word, phrase, or quote...">
-        <select id="inputType">
-            <option value="word">Word</option>
-            <option value="phrase">Phrase</option>
-            <option value="quote">Quotation</option>
-        </select>
-        <button onclick="addEntry()">Add & Generate Context</button>
-        <div id="loading">Discovering model & generating context...</div>
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <h3>Add to Vault</h3>
+            <div class="input-group">
+                <label>Item Type</label>
+                <select id="inputType">
+                    <option value="word">Word</option>
+                    <option value="phrase">Phrase</option>
+                    <option value="quote">Quotation</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Text</label>
+                <input type="text" id="inputText" placeholder="Enter text here...">
+            </div>
+            <div id="loading">Generating context...</div>
+            <div class="modal-btns">
+                <button class="btn btn-cancel" onclick="closeModal('addModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addEntry()">Generate</button>
+            </div>
+        </div>
     </div>
-
-    <div id="entriesList"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const savedKey = localStorage.getItem('geminiApiKey');
             if (savedKey) {
                 document.getElementById('apiKey').value = savedKey;
-                document.getElementById('keyStatus').innerText = "API Key is saved on this device.";
+                document.getElementById('keyStatus').innerText = "Key is securely saved on device.";
             }
             renderEntries();
         });
 
+        // Modal Logic
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // UI Interactions
+        function toggleCard(element) {
+            element.classList.toggle('expanded');
+        }
+
+        function speakText(event, text) {
+            event.stopPropagation(); // Prevent card from expanding when clicking audio
+            const utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function filterEntries() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.entry-card');
+            cards.forEach(card => {
+                const text = card.querySelector('.entry-title').innerText.toLowerCase();
+                if (text.includes(query)) card.style.display = 'block';
+                else card.style.display = 'none';
+            });
+        }
+
+        // Core App Logic
         function saveApiKey() {
             const key = document.getElementById('apiKey').value.trim();
             if (key) {
                 localStorage.setItem('geminiApiKey', key);
-                // Clear any cached model so it re-checks the new key
                 localStorage.removeItem('workingGeminiModel');
-                document.getElementById('keyStatus').innerText = "API Key saved successfully!";
+                document.getElementById('keyStatus').innerText = "Saved successfully!";
+                setTimeout(() => closeModal('settingsModal'), 1000);
             }
         }
 
         async function getWorkingModel(apiKey) {
-            // Check if we already found a working model previously
             let cachedModel = localStorage.getItem('workingGeminiModel');
             if (cachedModel) return cachedModel;
 
-            // Otherwise, ask Google API what models this specific key has access to
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
             const data = await response.json();
-            
             if (data.error) throw new Error(data.error.message);
 
-            const validModels = data.models.filter(m => 
-                m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent")
-            );
+            const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes("generateContent"));
+            if (!validModels.length) throw new Error("No compatible models found.");
 
-            if (validModels.length === 0) throw new Error("No compatible models found for this API key.");
-
-            // Prefer the latest flash models, fallback to whatever is available
             const preferred = validModels.find(m => m.name.includes("3-flash")) || 
                               validModels.find(m => m.name.includes("2.5-flash")) || 
-                              validModels.find(m => m.name.includes("flash")) || 
-                              validModels[0];
+                              validModels.find(m => m.name.includes("flash")) || validModels[0];
 
             localStorage.setItem('workingGeminiModel', preferred.name);
             return preferred.name;
@@ -132,68 +339,79 @@
             const type = document.getElementById('inputType').value;
             const apiKey = localStorage.getItem('geminiApiKey');
 
-            if (!text) { alert("Please enter a word, phrase, or quote."); return; }
-            if (!apiKey) { alert("Please enter and save your API key first."); return; }
+            if (!text) { alert("Please enter text."); return; }
+            if (!apiKey) { alert("Please set your API key in settings."); openModal('settingsModal'); return; }
 
             document.getElementById('loading').style.display = 'block';
 
             try {
-                // Auto-discover the correct model string for your key
                 const modelName = await getWorkingModel(apiKey);
-                
-                const prompt = `You are a helpful language and media context assistant. The user has provided a ${type}: "${text}". Briefly explain its meaning or significance, and provide 2 or 3 examples of how it is used in context. Keep formatting clean.`;
+                const prompt = `Act as an expert language teacher and media analyst. The user provided this ${type}: "${text}". Briefly define it, explain its significance or nuance, and provide 2 excellent real-world examples of its usage. Keep formatting extremely clean and easy to read.`;
 
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
                 const data = await response.json();
-                
                 if (data.error) throw new Error(data.error.message);
 
                 const contextResult = data.candidates[0].content.parts[0].text;
-
                 saveToStorage(text, type, contextResult);
                 
                 document.getElementById('inputText').value = '';
+                closeModal('addModal');
                 renderEntries();
-
+                document.getElementById('searchInput').value = ''; // Reset search
             } catch (error) {
-                // If it fails, clear the cached model so it tries a new one next time
                 localStorage.removeItem('workingGeminiModel');
-                alert("Error generating context.\nDetails: " + error.message);
+                alert("Error: " + error.message);
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
         }
 
         function saveToStorage(text, type, context) {
-            let entries = JSON.parse(localStorage.getItem('vocabEntries')) || [];
+            let entries = JSON.parse(localStorage.getItem('vocabVault')) || [];
             entries.unshift({ id: Date.now(), text, type, context }); 
-            localStorage.setItem('vocabEntries', JSON.stringify(entries));
+            localStorage.setItem('vocabVault', JSON.stringify(entries));
         }
 
-        function deleteEntry(id) {
-            let entries = JSON.parse(localStorage.getItem('vocabEntries')) || [];
-            entries = entries.filter(entry => entry.id !== id);
-            localStorage.setItem('vocabEntries', JSON.stringify(entries));
-            renderEntries();
+        function deleteEntry(event, id) {
+            event.stopPropagation();
+            if(confirm("Are you sure you want to delete this?")) {
+                let entries = JSON.parse(localStorage.getItem('vocabVault')) || [];
+                entries = entries.filter(entry => entry.id !== id);
+                localStorage.setItem('vocabVault', JSON.stringify(entries));
+                renderEntries();
+            }
         }
 
         function renderEntries() {
             const entriesList = document.getElementById('entriesList');
-            let entries = JSON.parse(localStorage.getItem('vocabEntries')) || [];
+            let entries = JSON.parse(localStorage.getItem('vocabVault')) || [];
             
+            if (entries.length === 0) {
+                entriesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); margin-top: 50px;">Your vault is empty. Tap the + button to add your first item.</div>`;
+                return;
+            }
+
             entriesList.innerHTML = entries.map(entry => `
-                <div class="entry-card">
-                    <div class="entry-type">${entry.type}</div>
-                    <div class="entry-title">${entry.text}</div>
-                    <div class="entry-context">${entry.context.replace(/\n/g, '<br>')}</div>
-                    <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
+                <div class="entry-card" onclick="toggleCard(this)">
+                    <div class="card-header">
+                        <div>
+                            <div class="entry-type">${entry.type}</div>
+                            <div class="entry-title">${entry.text}</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="speakText(event, '${entry.text.replace(/'/g, "\\'")}')">🔊</button>
+                        </div>
+                    </div>
+                    <div class="entry-content">
+                        ${entry.context}
+                        <button class="delete-btn" onclick="deleteEntry(event, ${entry.id})">Remove from Vault</button>
+                    </div>
                 </div>
             `).join('');
         }
