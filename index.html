@@ -104,7 +104,6 @@
             border-radius: 20px; padding: 24px; max-height: 90vh; display: flex; flex-direction: column;
         }
         
-        /* Chat Specific Styles */
         #chatModal .modal { height: 80vh; max-width: 500px; padding: 15px; }
         #chatBox {
             flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
@@ -117,12 +116,13 @@
         .chat-input-area input { flex-grow: 1; padding: 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); outline: none;}
         .chat-input-area button { background: var(--primary); color: white; border: none; border-radius: 20px; padding: 0 20px; font-weight: bold; }
 
+        .input-group { margin-bottom: 15px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;}
         .input-group input, .input-group select {
             width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
-            background: var(--bg-color); color: var(--text-main); font-size: 1rem; box-sizing: border-box; margin-bottom: 15px;
+            background: var(--bg-color); color: var(--text-main); font-size: 1rem; box-sizing: border-box;
         }
-        .modal-btns { display: flex; gap: 10px; margin-top: auto; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
         .btn { flex: 1; padding: 14px; border-radius: 10px; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; }
         .btn-cancel { background: var(--bg-color); color: var(--text-main); }
         .btn-primary { background: var(--primary); color: white; }
@@ -151,10 +151,17 @@
                 <label>Gemini API Key</label>
                 <input type="password" id="apiKey" placeholder="Paste key here...">
             </div>
-            <div id="keyStatus" style="font-size: 0.8rem; color: #34c759; margin-bottom: 15px;"></div>
+            
+            <div class="input-group">
+                <label>Voice Selector</label>
+                <select id="voiceSelect"><option>Loading voices...</option></select>
+                <button class="btn btn-cancel" onclick="testVoice()" style="width: 100%; margin-top: 10px; padding: 10px;">🔊 Test Selected Voice</button>
+            </div>
+
+            <div id="keyStatus" style="font-size: 0.8rem; color: #34c759; margin-bottom: 10px;"></div>
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal('settingsModal')">Close</button>
-                <button class="btn btn-primary" onclick="saveApiKey()">Save</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save All</button>
             </div>
         </div>
     </div>
@@ -169,6 +176,8 @@
                     <option value="phrase">Phrase</option>
                     <option value="quote">Quotation</option>
                 </select>
+            </div>
+            <div class="input-group">
                 <label>Text</label>
                 <input type="text" id="inputText" placeholder="Enter text here...">
             </div>
@@ -196,16 +205,44 @@
 
     <script>
         let chatHistory = [];
+        let availableVoices = [];
 
-        // Pre-load voices for the browser
-        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+        // Voice Loading Logic
+        function loadVoices() {
+            availableVoices = window.speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voiceSelect');
+            
+            if (availableVoices.length > 0) {
+                voiceSelect.innerHTML = '';
+                availableVoices.forEach((voice, index) => {
+                    // Filter to English voices to keep the list clean
+                    if(voice.lang.startsWith('en')) {
+                        const option = document.createElement('option');
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        option.value = voice.name;
+                        voiceSelect.appendChild(option);
+                    }
+                });
+
+                // Restore saved voice if it exists
+                const savedVoice = localStorage.getItem('selectedVoiceName');
+                if (savedVoice) {
+                    voiceSelect.value = savedVoice;
+                }
+            }
+        }
+
+        // Chrome/Safari requires this event to load voices
+        window.speechSynthesis.onvoiceschanged = loadVoices;
 
         document.addEventListener('DOMContentLoaded', () => {
             const savedKey = localStorage.getItem('geminiApiKey');
             if (savedKey) {
                 document.getElementById('apiKey').value = savedKey;
-                document.getElementById('keyStatus').innerText = "Key is securely saved on device.";
+                document.getElementById('keyStatus').innerText = "Settings saved on device.";
             }
+            // Attempt immediate load for some browsers
+            loadVoices(); 
             renderEntries();
         });
 
@@ -213,23 +250,26 @@
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function toggleCard(element) { element.classList.toggle('expanded'); }
 
+        function testVoice() {
+            const voiceName = document.getElementById('voiceSelect').value;
+            const utterance = new SpeechSynthesisUtterance("Hello, this is how I will sound.");
+            const selectedVoice = availableVoices.find(v => v.name === voiceName);
+            if (selectedVoice) utterance.voice = selectedVoice;
+            window.speechSynthesis.speak(utterance);
+        }
+
         function speakText(event, text) {
             event.stopPropagation();
             const utterance = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-
-            // Hunt for highest quality voices
-            const bestVoice = voices.find(v => v.name.includes('Premium') || v.name.includes('Enhanced'))
-                           || voices.find(v => v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel'))
-                           || voices.find(v => v.lang.startsWith('en-'));
-
-            if (bestVoice) {
-                utterance.voice = bestVoice;
+            const savedVoiceName = localStorage.getItem('selectedVoiceName');
+            
+            // Ensure voices are loaded just in case
+            if (availableVoices.length === 0) availableVoices = window.speechSynthesis.getVoices();
+            
+            if (savedVoiceName) {
+                const selectedVoice = availableVoices.find(v => v.name === savedVoiceName);
+                if (selectedVoice) utterance.voice = selectedVoice;
             }
-
-            // Tweak cadence for a more natural feel
-            utterance.rate = 0.95; 
-            utterance.pitch = 1.05;
 
             window.speechSynthesis.speak(utterance);
         }
@@ -242,14 +282,20 @@
             });
         }
 
-        function saveApiKey() {
+        function saveSettings() {
             const key = document.getElementById('apiKey').value.trim();
+            const voiceName = document.getElementById('voiceSelect').value;
+
             if (key) {
                 localStorage.setItem('geminiApiKey', key);
                 localStorage.removeItem('workingGeminiModel');
-                document.getElementById('keyStatus').innerText = "Saved successfully!";
-                setTimeout(() => closeModal('settingsModal'), 1000);
             }
+            if (voiceName) {
+                localStorage.setItem('selectedVoiceName', voiceName);
+            }
+
+            document.getElementById('keyStatus').innerText = "Saved successfully!";
+            setTimeout(() => closeModal('settingsModal'), 1000);
         }
 
         async function getWorkingModel(apiKey) {
@@ -323,7 +369,6 @@
             `).join('');
         }
 
-        // --- AI Tutor Chat Logic ---
         async function openChatTutor() {
             const apiKey = localStorage.getItem('geminiApiKey');
             let entries = JSON.parse(localStorage.getItem('vocabVault')) || [];
