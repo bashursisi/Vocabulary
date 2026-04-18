@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contextual Vault</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h2 { text-align: center; color: #2c3e50; }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        button:hover { background-color: #2980b9; }
+        .entry-card {
+            background: white;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .entry-title { font-weight: bold; font-size: 1.2em; margin-bottom: 5px; }
+        .entry-type { font-size: 0.8em; color: #7f8c8d; text-transform: uppercase; }
+        .entry-context { margin-top: 10px; white-space: pre-wrap; font-size: 0.95em; line-height: 1.5; }
+        .delete-btn { background-color: #e74c3c; margin-top: 10px; padding: 8px; }
+        #loading { display: none; text-align: center; color: #3498db; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>My Context Vault</h2>
+
+    <div class="section" id="settingsSection">
+        <label for="apiKey"><strong>1. Set AI API Key</strong> (Needed to generate context):</label>
+        <input type="password" id="apiKey" placeholder="Enter Gemini API Key...">
+        <button onclick="saveApiKey()">Save Key</button>
+        <div id="keyStatus" style="font-size: 0.8em; margin-top: 5px; color: green;"></div>
+    </div>
+
+    <div class="section">
+        <label for="inputText"><strong>2. Add New Item</strong></label>
+        <input type="text" id="inputText" placeholder="Word, phrase, or quote...">
+        <select id="inputType">
+            <option value="word">Word</option>
+            <option value="phrase">Phrase</option>
+            <option value="quote">Quotation</option>
+        </select>
+        <button onclick="addEntry()">Add & Generate Context</button>
+        <div id="loading">Generating context... Please wait.</div>
+    </div>
+
+    <div id="entriesList"></div>
+
+    <script>
+        // Load API Key on startup
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedKey = localStorage.getItem('geminiApiKey');
+            if (savedKey) {
+                document.getElementById('apiKey').value = savedKey;
+                document.getElementById('keyStatus').innerText = "API Key is saved on this device.";
+            }
+            renderEntries();
+        });
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKey').value.trim();
+            if (key) {
+                localStorage.setItem('geminiApiKey', key);
+                document.getElementById('keyStatus').innerText = "API Key saved successfully!";
+            }
+        }
+
+        async function addEntry() {
+            const text = document.getElementById('inputText').value.trim();
+            const type = document.getElementById('inputType').value;
+            const apiKey = localStorage.getItem('geminiApiKey');
+
+            if (!text) { alert("Please enter a word, phrase, or quote."); return; }
+            if (!apiKey) { alert("Please enter and save your API key first."); return; }
+
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                // Construct the prompt for the AI
+                const prompt = `You are a helpful language and media context assistant. The user has provided a ${type}: "${text}". Briefly explain its meaning or significance, and provide 2 or 3 examples of how it is used in context. Keep it formatting clean.`;
+
+                // Call Gemini API
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error.message);
+
+                const contextResult = data.candidates[0].content.parts[0].text;
+
+                // Save to local storage
+                saveToStorage(text, type, contextResult);
+                
+                // Clear input and re-render
+                document.getElementById('inputText').value = '';
+                renderEntries();
+
+            } catch (error) {
+                alert("Error generating context. Check your API key or internet connection.\nDetails: " + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function saveToStorage(text, type, context) {
+            let entries = JSON.parse(localStorage.getItem('vocabEntries')) || [];
+            entries.unshift({ id: Date.now(), text, type, context }); // Add to top
+            localStorage.setItem('vocabEntries', JSON.stringify(entries));
+        }
+
+        function deleteEntry(id) {
+            let entries = JSON.parse(localStorage.getItem('vocabEntries')) || [];
+            entries = entries.filter(entry => entry.id !== id);
+            localStorage.setItem('vocabEntries', JSON.stringify(entries));
+            renderEntries();
+        }
+
+        function renderEntries() {
+            const entriesList = document.getElementById('entriesList');
+            let entries = JSON.parse(localStorage.getItem('vocabEntries')) || [];
+            
+            entriesList.innerHTML = entries.map(entry => `
+                <div class="entry-card">
+                    <div class="entry-type">${entry.type}</div>
+                    <div class="entry-title">${entry.text}</div>
+                    <div class="entry-context">${entry.context.replace(/\n/g, '<br>')}</div>
+                    <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
