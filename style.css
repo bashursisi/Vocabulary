@@ -1,0 +1,1047 @@
+/* ==========================================================
+   MEB 8. SINIF İNGİLİZCE ÖĞRENME PLATFORMU
+   Epilepsi Dostu, Sakin & Dikkat Geliştirici Tasarım Sistemi
+   ========================================================== */
+
+:root {
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --bg-gradient: linear-gradient(180deg, #F0F4F8 0%, #E6EEF8 100%);
+  --card-bg: #FFFFFF;
+  --text-dark: #1E293B;
+  --text-muted: #64748B;
+  --primary: #3B82F6;
+  --primary-light: #EFF6FF;
+  --primary-hover: #2563EB;
+  --success: #10B981;
+  --success-light: #ECFDF5;
+  --warning: #F59E0B;
+  --warning-light: #FEF3C7;
+  --danger-soft: #EF4444;
+  --danger-light: #FEE2E2;
+  --purple: #8B5CF6;
+  --purple-light: #F5F3FF;
+  --border: #E2E8F0;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 9999px;
+  --transition-speed: 0.25s;
+  --font-scale: 1;
+}
+
+/* Büyük Yazı Modu */
+body.large-text-mode {
+  --font-scale: 1.15;
+}
+
+/* Sakin Mod (Tüm animasyonları ve geçişleri sıfırlar) */
+body.calm-mode * {
+  animation: none !important;
+  transition: none !important;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg-gradient);
+  color: var(--text-dark);
+  min-height: 100vh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-size: calc(16px * var(--font-scale));
+  line-height: 1.5;
+}
+
+/* Mobil Cihaz Kapsayıcısı */
+.app-container {
+  width: 100%;
+  max-width: 520px;
+  min-height: 100vh;
+  background: #FFFFFF;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ---------------- ÜST BAŞLIK & BİLGİ ÇUBUĞU ---------------- */
+.app-header {
+  background: #FFFFFF;
+  border-bottom: 2px solid #F1F5F9;
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.logo-icon {
+  font-size: 26px;
+}
+
+.logo-text h1 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1E293B;
+  line-height: 1.1;
+}
+
+.logo-text span {
+  font-size: 11px;
+  color: var(--primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.star-badge {
+  background: var(--warning-light);
+  color: #B45309;
+  border: 1px solid #FDE68A;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.icon-btn {
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  cursor: pointer;
+  color: var(--text-dark);
+  transition: transform 0.1s ease, background 0.2s ease;
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+/* ---------------- HIZLI KONTROL ŞERİDİ (Ses & Sakin Mod) ---------------- */
+.quick-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F8FAFC;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.chip-btn {
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: pointer;
+}
+
+.chip-btn.active {
+  background: var(--primary);
+  color: #FFFFFF;
+  border-color: var(--primary);
+}
+
+/* ---------------- ANA İÇERİK ALANI ---------------- */
+.main-view {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* ---------------- ÜNİTE LİSTESİ EKRANI ---------------- */
+.section-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.section-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.units-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.unit-card {
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.unit-card:hover, .unit-card:active {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.unit-card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.unit-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.unit-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unit-card-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.unit-progress-bar {
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: 3px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.unit-progress-fill {
+  height: 100%;
+  background: var(--success);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.unit-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.unit-badge {
+  background: #F1F5F9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ---------------- ÜNİTE DETAY & OYUN SEÇİM MENÜSÜ ---------------- */
+.unit-hero {
+  background: var(--primary-light);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #DBEAFE;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-icon {
+  font-size: 36px;
+}
+
+.hero-text h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1E3A8A;
+}
+
+.hero-text p {
+  font-size: 12px;
+  color: #3B82F6;
+  font-weight: 500;
+}
+
+.back-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.back-btn {
+  background: #F1F5F9;
+  border: none;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.game-tile {
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.game-tile:active {
+  transform: scale(0.96);
+  border-color: var(--primary);
+}
+
+.game-tile-icon {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.game-tile-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 3px;
+}
+
+.game-tile-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.game-tile.featured {
+  grid-column: span 2;
+  flex-direction: row;
+  text-align: left;
+  padding: 14px 18px;
+  gap: 14px;
+  background: #FAF5FF;
+  border-color: #E9D5FF;
+}
+
+.game-tile.featured .game-tile-icon {
+  margin-bottom: 0;
+  font-size: 36px;
+}
+
+/* ---------------- OYUN ARENA / ORTAK OYUN EKRANI ---------------- */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.game-progress-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.game-step-counter {
+  background: var(--primary-light);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+/* ---------------- OYUN 1: KELİME KARTLARI (FLASHCARDS) ---------------- */
+.flashcard-wrapper {
+  perspective: 1000px;
+  width: 100%;
+  min-height: 280px;
+  margin-bottom: 16px;
+}
+
+.flashcard {
+  width: 100%;
+  min-height: 280px;
+  background: #FFFFFF;
+  border: 3px solid #E2E8F0;
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.card-top-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.card-unit-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.flashcard-icon {
+  font-size: 52px;
+  margin: 10px 0;
+}
+
+.flashcard-word {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-dark);
+  letter-spacing: -0.5px;
+}
+
+.flashcard-phonetic {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.flashcard-meaning {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--success);
+  background: var(--success-light);
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  margin: 8px 0;
+  display: inline-block;
+}
+
+.flashcard-example {
+  background: #F8FAFC;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-dark);
+  width: 100%;
+  border-left: 3px solid var(--primary);
+  margin-top: 8px;
+  text-align: left;
+}
+
+.flashcard-example-tr {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.audio-buttons-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.sound-play-btn {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 2px solid #BFDBFE;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.sound-play-btn:active {
+  transform: scale(0.94);
+}
+
+.sound-slow-btn {
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.card-nav-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: #F1F5F9;
+  color: var(--text-dark);
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary {
+  flex: 2;
+  background: var(--primary);
+  color: #FFFFFF;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary:active, .btn-secondary:active {
+  transform: scale(0.97);
+}
+
+/* ---------------- OYUN 2: ÇOKTAN SEÇMELİ TEST (QUIZ) ---------------- */
+.quiz-card {
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.quiz-prompt-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.quiz-question-word {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.quiz-options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.quiz-option-btn {
+  background: #F8FAFC;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease;
+}
+
+.quiz-option-btn:active {
+  transform: scale(0.98);
+}
+
+.quiz-option-btn.correct {
+  background: var(--success-light) !important;
+  border-color: var(--success) !important;
+  color: #065F46 !important;
+}
+
+.quiz-option-btn.wrong {
+  background: var(--danger-light) !important;
+  border-color: var(--danger-soft) !important;
+  color: #991B1B !important;
+}
+
+/* ---------------- OYUN 3: KELİME EŞLEŞTİRME (MEMORY & MATCH) ---------------- */
+.match-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.match-card {
+  min-height: 72px;
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+  line-height: 1.25;
+}
+
+.match-card:active {
+  transform: scale(0.96);
+}
+
+.match-card.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.match-card.matched {
+  background: var(--success-light);
+  border-color: var(--success);
+  color: #065F46;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ---------------- OYUN 4: HARF TAMAMLAMA (SPELLING BEE) ---------------- */
+.spell-clue-box {
+  background: #F8FAFC;
+  border: 2px dashed #CBD5E1;
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.spell-clue-tr {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.spell-slots-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.letter-slot {
+  width: 38px;
+  height: 46px;
+  background: #FFFFFF;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.letter-slot.filled {
+  background: var(--primary-light);
+}
+
+.spell-keyboard-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.letter-bubble {
+  width: 44px;
+  height: 48px;
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-dark);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.1s ease;
+}
+
+.letter-bubble:active {
+  transform: scale(0.9);
+}
+
+.letter-bubble.used {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.spell-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ---------------- OYUN 5: DOĞRU MU YANLIŞ MI (TRUE OR FALSE) ---------------- */
+.tf-card {
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.tf-en-word {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.tf-equals {
+  font-size: 18px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.tf-tr-word {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.tf-buttons-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.tf-btn {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  font-size: 17px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.tf-btn.true {
+  background: var(--success);
+  color: #FFFFFF;
+}
+
+.tf-btn.false {
+  background: var(--danger-soft);
+  color: #FFFFFF;
+}
+
+.tf-btn:active {
+  transform: scale(0.96);
+}
+
+/* ---------------- OYUN 6: DİNLE VE BUL (LISTENING CHALLENGE) ---------------- */
+.listen-box {
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.big-speaker-btn {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: 40px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+  margin: 10px auto 16px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.big-speaker-btn:active {
+  transform: scale(0.92);
+}
+
+/* ---------------- OYUN 7: LGS KALIPLARI (EXPRESSIONS & DIALOGUES) ---------------- */
+.expression-card {
+  background: #FFFFFF;
+  border: 2px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.expression-category {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--purple);
+  background: var(--purple-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.expression-en {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.expression-tr {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ---------------- GERİ BİLDİRİM & SONUÇ MODALLARI ---------------- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.result-celebration-icon {
+  font-size: 60px;
+  margin-bottom: 10px;
+}
+
+.result-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.result-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.result-stars-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.badge-item.locked {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+/* Mobil Alt Çubuk */
+.bottom-nav {
+  position: sticky;
+  bottom: 0;
+  background: #FFFFFF;
+  border-top: 2px solid #F1F5F9;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 12px;
+  z-index: 40;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.nav-item.active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.nav-item-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}

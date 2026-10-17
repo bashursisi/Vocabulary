@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>8. Sınıf LGS İngilizce • Eğlenceli Kelime Dünyası</title>
+  
+  <!-- Mobil & PWA Ayarları -->
+  <meta name="theme-color" content="#3B82F6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="LGS İngilizce">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- ÜST BİLGİ & KONTROL ÇUBUĞU -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="logo-area" id="btn-home">
+          <span class="logo-icon">🚀</span>
+          <div class="logo-text">
+            <h1>LGS İngilizce</h1>
+            <span>MEB 8. Sınıf • Özel Öğrenme</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="star-badge" id="star-badge-btn" title="Kazanılan Yıldızlar">
+            <span>⭐</span>
+            <span id="total-stars-count">0</span>
+          </div>
+
+          <button class="icon-btn" id="btn-trophy" title="Başarılarım & Rozetler">
+            🏆
+          </button>
+        </div>
+      </div>
+
+      <!-- DİKKAT VE EPİLEPSİ DOSTU HIZLI AYARLAR -->
+      <div class="quick-controls">
+        <div class="control-item">
+          <button class="chip-btn" id="btn-toggle-calm" title="Göz yormayan, hareketsiz sakin mod">
+            🌿 Sakin Mod
+          </button>
+        </div>
+        <div class="control-item">
+          <button class="chip-btn" id="btn-toggle-text" title="Yazıları büyüt">
+            🔍 Büyük Yazı
+          </button>
+        </div>
+        <div class="control-item">
+          <button class="chip-btn active" id="btn-toggle-speed" title="Ses hızını değiştir">
+            🐢 Yavaş Ses
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ANA İÇERİK ALANI -->
+    <main class="main-view">
+
+      <!-- ================= 1. EKRAN: ÜNİTELER LİSTESİ ================= -->
+      <section class="screen active" id="screen-units">
+        <h2 class="section-title">MEB 8. Sınıf Üniteleri</h2>
+        <p class="section-desc">Çalışmak istediğin üniteye dokun ve eğlenceli oyunlarla kelimeleri keşfet!</p>
+        
+        <div class="units-grid" id="units-list-container">
+          <!-- Üniteler JavaScript ile yüklenecek -->
+        </div>
+      </section>
+
+      <!-- ================= 2. EKRAN: ÜNİTE DETAY & OYUN MENÜSÜ ================= -->
+      <section class="screen" id="screen-unit-detail">
+        <div class="back-row">
+          <button class="back-btn" id="btn-back-to-units">
+            ⬅️ Tüm Üniteler
+          </button>
+        </div>
+
+        <div class="unit-hero">
+          <div class="hero-header">
+            <span class="hero-icon" id="detail-unit-icon">🤝</span>
+            <div class="hero-text">
+              <h2 id="detail-unit-title">1. Ünite: Friendship</h2>
+              <p id="detail-unit-subtitle">Arkadaşlık, davetler ve mazeretler</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title" style="font-size: 16px; margin-bottom: 10px;">Nasıl Çalışmak İstersin?</h3>
+
+        <div class="games-grid">
+          <!-- Oyun 1: Kartlar -->
+          <div class="game-tile featured" id="game-tile-cards">
+            <span class="game-tile-icon">🃏</span>
+            <div>
+              <div class="game-tile-title">Kelime Kartları (Flashcards)</div>
+              <div class="game-tile-desc">Sesli telaffuz, Türkçe anlam ve örnek cümleler</div>
+            </div>
+          </div>
+
+          <!-- Oyun 2: Quiz -->
+          <div class="game-tile" id="game-tile-quiz">
+            <span class="game-tile-icon">🎯</span>
+            <div class="game-tile-title">Kelime Testi</div>
+            <div class="game-tile-desc">4 şıklı eğlenceli test</div>
+          </div>
+
+          <!-- Oyun 3: Eşleştirme -->
+          <div class="game-tile" id="game-tile-match">
+            <span class="game-tile-icon">🧩</span>
+            <div class="game-tile-title">Eşleştirme</div>
+            <div class="game-tile-desc">İngilizce ve Türkçeyi eşle</div>
+          </div>
+
+          <!-- Oyun 4: Harf Tamamlama -->
+          <div class="game-tile" id="game-tile-spelling">
+            <span class="game-tile-icon">✍️</span>
+            <div class="game-tile-title">Harf Tamamla</div>
+            <div class="game-tile-desc">Harfleri sırayla diz</div>
+          </div>
+
+          <!-- Oyun 5: Dinle ve Bul -->
+          <div class="game-tile" id="game-tile-listen">
+            <span class="game-tile-icon">🎧</span>
+            <div class="game-tile-title">Dinle ve Bul</div>
+            <div class="game-tile-desc">Sesi dinle, anlamını seç</div>
+          </div>
+
+          <!-- Oyun 6: Doğru mu Yanlış mı -->
+          <div class="game-tile" id="game-tile-truefalse">
+            <span class="game-tile-icon">⚡</span>
+            <div class="game-tile-title">Doğru mu?</div>
+            <div class="game-tile-desc">Hızlı ve rahat seçim</div>
+          </div>
+
+          <!-- Oyun 7: LGS Kalıpları -->
+          <div class="game-tile" id="game-tile-expressions">
+            <span class="game-tile-icon">💬</span>
+            <div class="game-tile-title">LGS Kalıpları</div>
+            <div class="game-tile-desc">Diyaloglar ve önemli cümleler</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. EKRAN: FLASHCARD (KELİME KARTLARI) ================= -->
+      <section class="screen" id="screen-game-flashcards">
+        <div class="game-header">
+          <button class="back-btn" id="btn-exit-flashcards">⬅️ Çıkış</button>
+          <div class="game-progress-info">
+            <span class="game-step-counter" id="flashcard-step-badge">1 / 20</span>
+          </div>
+        </div>
+
+        <div class="flashcard-wrapper">
+          <div class="flashcard">
+            <div class="card-top-tag">
+              <span class="card-unit-badge" id="flashcard-unit-badge">1. Ünite</span>
+              <span>🔊 Dokun ve Dinle</span>
+            </div>
+
+            <div class="flashcard-icon" id="flashcard-icon">🤝</div>
+
+            <div class="flashcard-word" id="flashcard-en-word">Accept</div>
+            <div class="flashcard-phonetic" id="flashcard-phonetic">[əkˈsept]</div>
+
+            <div class="audio-buttons-row">
+              <button class="sound-play-btn" id="btn-play-card-sound">
+                🔊 Seslendir
+              </button>
+              <button class="sound-slow-btn" id="btn-play-card-slow">
+                🐢 Yavaş
+              </button>
+            </div>
+
+            <div class="flashcard-meaning" id="flashcard-tr-meaning">Kabul etmek</div>
+
+            <div class="flashcard-example">
+              <div><b>Örnek:</b> <span id="flashcard-example-en">"I accept your invitation."</span></div>
+              <div class="flashcard-example-tr" id="flashcard-example-tr">Davetini kabul ediyorum.</div>
+              <button class="chip-btn" id="btn-speak-example" style="margin-top: 6px;">🔊 Cümleyi Dinle</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-nav-row">
+          <button class="btn-secondary" id="btn-card-prev">⬅️ Önceki</button>
+          <button class="btn-primary" id="btn-card-learned">⭐ Öğrendim! (+1)</button>
+          <button class="btn-secondary" id="btn-card-next">Sonraki ➡️</button>
+        </div>
+      </section>
+
+      <!-- ================= 4. EKRAN: ÇOKTAN SEÇMELİ TEST (QUIZ) ================= -->
+      <section class="screen" id="screen-game-quiz">
+        <div class="game-header">
+          <button class="back-btn" id="btn-exit-quiz">⬅️ Çıkış</button>
+          <div class="game-progress-info">
+            <span class="game-step-counter" id="quiz-step-badge">Soru 1 / 5</span>
+          </div>
+        </div>
+
+        <div class="quiz-card">
+          <div class="quiz-prompt-label">Bu kelimenin Türkçe anlamı nedir?</div>
+          <div class="quiz-question-word" id="quiz-word-display">Friendship</div>
+          <button class="sound-play-btn" id="btn-quiz-audio" style="margin: 0 auto 12px auto; font-size: 13px;">
+            🔊 Tekrar Dinle
+          </button>
+        </div>
+
+        <div class="quiz-options-grid" id="quiz-options-container">
+          <!-- 4 Seçenek JavaScript ile dinamik gelir -->
+        </div>
+      </section>
+
+      <!-- ================= 5. EKRAN: EŞLEŞTİRME OYUNU ================= -->
+      <section class="screen" id="screen-game-match">
+        <div class="game-header">
+          <button class="back-btn" id="btn-exit-match">⬅️ Çıkış</button>
+          <div class="game-progress-info">
+            <span>🧩 Doğru Çiftleri Bul</span>
+          </div>
+        </div>
+
+        <p class="section-desc" style="text-align: center;">Bir İngilizce kelimeye, ardından Türkçe anlamına dokun.</p>
+
+        <div class="match-grid" id="match-grid-container">
+          <!-- 8 Kart JavaScript ile gelir -->
+        </div>
+      </section>
+
+      <!-- ================= 6. EKRAN: HARF TAMAMLAMA (SPELLING BEE) ================= -->
+      <section class="screen" id="screen-game-spelling">
+        <div class="game-header">
+          <button class="back-btn" id="btn-exit-spelling">⬅️ Çıkış</button>
+          <div class="game-progress-info">
+            <span class="game-step-counter" id="spell-step-badge">Kelime 1 / 5</span>
+          </div>
+        </div>
+
+        <div class="spell-clue-box">
+          <div style="font-size: 12px; color: #64748B; font-weight: 700; margin-bottom: 4px;">TÜRKÇE ANLAMI:</div>
+          <div class="spell-clue-tr" id="spell-tr-clue">Kabul etmek</div>
+          <button class="sound-play-btn" id="btn-spell-audio" style="margin: 6px auto 0 auto; font-size: 13px;">
+            🔊 Kelimeyi Dinle
+          </button>
+        </div>
+
+        <!-- Boş Harf Kutuları -->
+        <div class="spell-slots-row" id="spell-slots-row"></div>
+
+        <!-- Karışık Harf Klavyesi -->
+        <div class="spell-keyboard-row" id="spell-keyboard-row"></div>
+
+        <div class="spell-actions">
+          <button class="btn-secondary" id="btn-spell-clear">🔄 Temizle</button>
+          <button class="btn-secondary" id="btn-spell-hint" style="background: #FEF3C7; color: #B45309;">💡 İpucu Al</button>
+        </div>
+      </section>
+
+      <!-- ================= 7. EKRAN: DOĞRU MU YANLIŞ MI ================= -->
+      <section class="screen" id="screen-game-truefalse">
+        <div class="game-header">
+          <button class="back-btn" id="btn-exit-tf">⬅️ Çıkış</button>
+          <div class="game-progress-info">
+            <span class="game-step-counter" id="tf-step-badge">Soru 1 / 6</span>
+          </div>
+        </div>
+
+        <div class="tf-card">
+          <div class="tf-en-word" id="tf-en-word">Accept</div>
+          <div class="tf-equals">kelimesi şu anlama mı gelir?</div>
+          <div class="tf-tr-word" id="tf-tr-word">Kabul etmek</div>
+        </div>
+
+        <div class="tf-buttons-row">
+          <button class="tf-btn true" id="btn-tf-true">
+            <span>✅ DOĞRU</span>
+          </button>
+          <button class="tf-btn false" id="btn-tf-false">
+            <span>❌ YANLIŞ</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= 8. EKRAN: DİNLE VE BUL ================= -->
+      <section class="screen" id="screen-game-listen">
+        <div class="game-header">
+          <button class="back-btn" id="btn-exit-listen">⬅️ Çıkış</button>
+          <div class="game-progress-info">
+            <span class="game-step-counter" id="listen-step-badge">Soru 1 / 5</span>
+          </div>
+        </div>
+
+        <div class="listen-box">
+          <div class="quiz-prompt-label">Sesi dinle ve doğru anlamı seç:</div>
+          <button class="big-speaker-btn" id="btn-listen-play-big" title="Sesi Çal">
+            🔊
+          </button>
+          <div>
+            <button class="sound-slow-btn" id="btn-listen-play-slow">
+              🐢 Yavaş Dinle
+            </button>
+          </div>
+        </div>
+
+        <div class="quiz-options-grid" id="listen-options-container">
+          <!-- Seçenekler JavaScript ile gelir -->
+        </div>
+      </section>
+
+      <!-- ================= 9. EKRAN: LGS KALIPLARI & DİYALOGLAR ================= -->
+      <section class="screen" id="screen-game-expressions">
+        <div class="game-header">
+          <button class="back-btn" id="btn-exit-expressions">⬅️ Çıkış</button>
+          <div class="game-progress-info">
+            <span>💬 Kalıplar ve Diyaloglar</span>
+          </div>
+        </div>
+
+        <h3 class="section-title" id="expressions-unit-title" style="font-size: 16px; margin-bottom: 12px;"></h3>
+        <p class="section-desc">LGS sınavında en çok çıkan soru ve diyalog kalıpları:</p>
+
+        <div id="expressions-list-container">
+          <!-- Kalıp kartları buraya gelecek -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- KUTLAMA MODALI -->
+    <div class="modal-overlay" id="celebration-modal">
+      <div class="modal-content">
+        <div class="result-celebration-icon">🎉</div>
+        <h3 class="result-title" id="modal-title">Süpersin!</h3>
+        <p class="result-desc" id="modal-desc">Tüm soruları başarıyla tamamladın.</p>
+        <div class="result-stars-row" id="modal-stars-row">⭐⭐⭐</div>
+        <button class="btn-primary" id="btn-modal-continue" style="width: 100%;">
+          Devam Et 🚀
+        </button>
+      </div>
+    </div>
+
+    <!-- BAŞARI & ROZETLER MODALI -->
+    <div class="modal-overlay" id="trophy-modal">
+      <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
+        <div style="font-size: 38px; margin-bottom: 6px;">🏆</div>
+        <h3 class="result-title">Başarılarım & Rozetler</h3>
+        <p class="result-desc">Öğrendikçe yeni rozetlerin kilidi açılır!</p>
+
+        <div style="display: flex; justify-content: space-around; background: #F8FAFC; padding: 12px; border-radius: 12px; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 18px; font-weight: 800; color: #B45309;">⭐ <span id="trophy-total-stars">0</span></div>
+            <div style="font-size: 11px; color: #64748B;">Toplam Yıldız</div>
+          </div>
+          <div>
+            <div style="font-size: 18px; font-weight: 800; color: #3B82F6;">📚 <span id="trophy-total-words">0</span></div>
+            <div style="font-size: 11px; color: #64748B;">Çalışılan Kelime</div>
+          </div>
+        </div>
+
+        <div id="trophy-badges-container">
+          <!-- Rozetler JS ile gelir -->
+        </div>
+
+        <button class="btn-secondary modal-close-btn" style="width: 100%; margin-top: 14px;">
+          Kapat
+        </button>
+      </div>
+    </div>
+
+    <!-- MOBİL ALT MENÜ -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-target="units">
+        <span class="nav-item-icon">📚</span>
+        <span>Üniteler</span>
+      </button>
+      <button class="nav-item" data-target="games">
+        <span class="nav-item-icon">🎮</span>
+        <span>Oyunlar</span>
+      </button>
+      <button class="nav-item" data-target="trophies">
+        <span class="nav-item-icon">🏆</span>
+        <span>Rozetler</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- UYGULAMA BETİKLERİ -->
+  <script src="data.js"></script>
+  <script src="sound.js"></script>
+  <script src="app.js"></script>
+
+  <!-- PWA Service Worker Kaydı -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('SW registration note:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

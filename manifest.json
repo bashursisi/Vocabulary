@@ -1,0 +1,17 @@
+{
+  "name": "LGS 8. Sınıf İngilizce",
+  "short_name": "LGS İngilizce",
+  "description": "MEB 8. Sınıf İngilizce müfredatına uygun, eğlenceli ve sakin kelime öğrenme oyunu.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F0F4F8",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
