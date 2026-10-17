@@ -1,6 +1,6 @@
-# 🚀 MEB 8. Sınıf LGS İngilizce - Özel Öğrenme & Oyun Platformu
+# 🚀 MEB 7. Sınıf İngilizce - Özel Öğrenme & Oyun Platformu
 
-Bu uygulama; Türkiye'deki **8. sınıf (LGS) İngilizce müfredatına** uygun olarak, **epilepsi hassasiyeti** ve **dikkat/odaklanma güçlüğü** yaşayan bir öğrencinin İngilizce kelimeleri ve kalıpları severek, yorulmadan ve telefon üzerinden kolayca tekrar edebilmesi için özel olarak tasarlanmıştır.
+Bu uygulama; Türkiye'deki **7. sınıf İngilizce müfredatına** uygun olarak, **epilepsi hassasiyeti** ve **dikkat/odaklanma güçlüğü** yaşayan bir öğrencinin İngilizce kelimeleri ve kalıpları severek, yorulmadan ve telefon üzerinden kolayca tekrar edebilmesi için özel olarak tasarlanmıştır.
 
 ---
 
@@ -18,23 +18,23 @@ Bu uygulama; Türkiye'deki **8. sınıf (LGS) İngilizce müfredatına** uygun o
 * **🔍 Büyük Yazı Modu:** Küçük telefon ekranlarında rahat okuma için büyütülmüş yazı seçeneği.
 * **Bilişsel Yormayan Kısa Turlar (Micro-Learning):** Dikkat dağınıklığını önlemek için testler ve oyunlar 4-6 soruluk mini turlar halinde sunulur. Çocuk başarısızlık hissi yaşamaz, hemen yıldız kazanır.
 
-### 🔊 2. Doğal Sesli Telaffuz & Hız Kontrolü
+### 🔊 3. Doğal Sesli Telaffuz & Hız Kontrolü
 * **Web Speech API:** Harici sunucuya veya internet kotasına ihtiyaç duymadan cihazın kendi kaliteli İngilizce ses motorunu kullanır.
 * **🐢 Yavaş Ses (Slow Audio):** Telaffuzu zor kelimeleri ve diyalogları tane tane duyabilmesi için 0.75x yavaşlatılmış seslendirme seçeneği.
 * **Yumuşak Oyun Sesleri (Web Audio API):** Rahatsız edici "bip/yanlış" sesleri yerine beyni dinlendiren piyano/su damlası tınılarında başarı akorları.
 
-### 📚 3. Eksiksiz Güncel MEB Müfredatı (10 Ünite)
-1. **Unit 1: Friendship** (Arkadaşlık, Davetler, Mazeretler) - *22 Kelime + 8 Kalıp*
-2. **Unit 2: Teen Life** (Gençlik Hayatı, Tercihler, Rutinler) - *20 Kelime + 8 Kalıp*
-3. **Unit 3: In the Kitchen** (Mutfak, Yemek Tarifleri, Sıralama) - *20 Kelime + 8 Kalıp*
-4. **Unit 4: On the Phone** (Telefonda Görüşme, Mesaj Bırakma) - *20 Kelime + 8 Kalıp*
-5. **Unit 5: The Internet** (Güvenli İnternet, Ağ Terimleri) - *20 Kelime + 8 Kalıp*
-6. **Unit 6: Adventures** (Maceralar, Ekstrem Sporlar, Güvenlik) - *20 Kelime + 8 Kalıp*
-7. **Unit 7: Tourism** (Turizm, Tarihi Yerler, Tatil) - *20 Kelime + 8 Kalıp*
-8. **Unit 8: Chores** (Ev İşleri, Sorumluluklar, Kurallar) - *20 Kelime + 8 Kalıp*
-9. **Unit 9: Science** (Bilim İnsanları, Keşifler, İcatlar) - *20 Kelime + 8 Kalıp*
-10. **Unit 10: Natural Forces** (Doğal Afetler, Çevre, Önlemler) - *20 Kelime + 8 Kalıp*
-* ⭐ **Tüm Üniteler Genel Tekrar:** 200+ kelimenin ve 80 kalıbın tamamından karışık pratik modu!
+### 📚 4. Eksiksiz Güncel MEB 7. Sınıf Müfredatı (10 Ünite)
+1. **Unit 1: Appearance and Personality** (Görünüş ve Kişilik) - *20 Kelime + 8 Kalıp*
+2. **Unit 2: Sports** (Sporlar, Bireysel ve Takım Sporları) - *20 Kelime + 8 Kalıp*
+3. **Unit 3: Biographies** (Biyografiler, Ünlü Kişiler) - *20 Kelime + 8 Kalıp*
+4. **Unit 4: Wild Animals** (Vahşi Hayvanlar, Yaşam Alanları) - *20 Kelime + 8 Kalıp*
+5. **Unit 5: Television** (Televizyon Programları, Tercihler) - *20 Kelime + 8 Kalıp*
+6. **Unit 6: Celebrations** (Partiler, Kutlamalar, Davetler) - *20 Kelime + 8 Kalıp*
+7. **Unit 7: Dreams** (Hayaller, Gelecek ve Robotlar) - *20 Kelime + 8 Kalıp*
+8. **Unit 8: Public Buildings** (Kamu Binaları, Şehir) - *20 Kelime + 8 Kalıp*
+9. **Unit 9: Environment** (Çevre, Geri Dönüşüm, Doğa) - *20 Kelime + 8 Kalıp*
+10. **Unit 10: Planets** (Gezegenler, Uzay ve Güneş Sistemi) - *20 Kelime + 8 Kalıp*
+* ⭐ **Tüm Üniteler Genel Tekrar:** 200 kelimenin ve 80 kalıbın tamamından karışık pratik modu!
 
 ### 🎮 4. Zengin 7 Mini Oyun Modu
 1. **Kelime Kartları (Flashcards):** Sesli telaffuz, Türkçe anlam, örnek cümle ve Türkçe çevirisi. Karta dokunulduğunda doğrudan telaffuz eder.

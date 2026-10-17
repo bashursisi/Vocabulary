@@ -213,9 +213,9 @@ class EnglishApp {
       </div>
       <div class="unit-card-content">
         <div class="unit-card-title" style="color: #B45309;">Tüm Üniteler: Genel Tekrar</div>
-        <div class="unit-card-subtitle">200+ Kelime • Karışık LGS Pratiği</div>
+        <div class="unit-card-subtitle">200 Kelime • Karışık İngilizce Pratiği</div>
         <div class="unit-meta">
-          <span class="unit-badge" style="background: #FDE68A; color: #92400E;">Büyük Sınav & Hızlı Alıştırma</span>
+          <span class="unit-badge" style="background: #FDE68A; color: #92400E;">Büyük Tekrar & Hızlı Alıştırma</span>
         </div>
       </div>
     `;
@@ -1083,7 +1083,7 @@ class EnglishApp {
     const container = document.getElementById('expressions-list-container');
     container.innerHTML = '';
 
-    document.getElementById('expressions-unit-title').textContent = `${this.currentUnit.titleTr} - LGS Kalıpları`;
+    document.getElementById('expressions-unit-title').textContent = `${this.currentUnit.titleTr} - Önemli Kalıplar`;
 
     this.currentUnit.expressions.forEach(exp => {
       const card = document.createElement('div');
