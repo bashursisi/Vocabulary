@@ -34,6 +34,7 @@ class EnglishApp {
 
     this.currentStage = 1; // 1, 2, 3, 4 veya 'all'
     this.activeWords = [];
+    this.isUnitTest = false;
 
     this.initUI();
     this.applySettings();
@@ -50,8 +51,8 @@ class EnglishApp {
       wordsSpelled: 0,
       listeningCorrect: 0,
       learnedWords: {},
-      unitStages: {}, // unitId -> unlocked stage (1, 2, 3...)
-      allStagesUnlocked: false,
+      stageProgress: {}, // unitId -> stageNo -> completed activities
+      unitTests: {}, // unitId -> full-unit test completed
       calmMode: false,
       largeText: false,
       speechSpeed: 'slow' // Başlangıçta daha anlaşılır yavaş telaffuz
@@ -59,7 +60,15 @@ class EnglishApp {
 
     try {
       const saved = localStorage.getItem('ugur_english_state_v1');
-      return saved ? { ...defaultState, ...JSON.parse(saved) } : defaultState;
+      const state = saved ? { ...defaultState, ...JSON.parse(saved) } : defaultState;
+      // Earlier versions unlocked stages after one game. Start the new guided flow
+      // fresh while keeping the student's stars and learned-word history.
+      if (state.learningFlowVersion !== 2) {
+        state.stageProgress = {};
+        state.unitTests = {};
+        state.learningFlowVersion = 2;
+      }
+      return state;
     } catch (e) {
       return defaultState;
     }
@@ -206,6 +215,7 @@ class EnglishApp {
     allUnitsCard.className = 'unit-card';
     allUnitsCard.style.borderColor = '#F59E0B';
     allUnitsCard.style.background = '#FFFBEB';
+    const allUnitsComplete = MEB_UNITS.every(unit => this.state.unitTests[unit.id]?.completed);
 
     allUnitsCard.innerHTML = `
       <div class="unit-card-icon" style="background: #FEF3C7; color: #D97706;">
@@ -213,16 +223,17 @@ class EnglishApp {
       </div>
       <div class="unit-card-content">
         <div class="unit-card-title" style="color: #B45309;">Tüm Üniteler: Genel Tekrar</div>
-        <div class="unit-card-subtitle">200 Kelime • Karışık İngilizce Pratiği</div>
+          <div class="unit-card-subtitle">${allUnitsComplete ? '200 Kelime • Karışık İngilizce Pratiği' : 'Tüm ünite testleri bitince açılır'}</div>
         <div class="unit-meta">
-          <span class="unit-badge" style="background: #FDE68A; color: #92400E;">Büyük Tekrar & Hızlı Alıştırma</span>
+          <span class="unit-badge" style="background: #FDE68A; color: #92400E;">${allUnitsComplete ? 'Büyük Tekrar & Hızlı Alıştırma' : '🔒 Kilitli'}</span>
         </div>
       </div>
     `;
 
-    allUnitsCard.addEventListener('click', () => {
-      sound.playClick();
-      const virtualAllUnit = {
+    if (allUnitsComplete) {
+      allUnitsCard.addEventListener('click', () => {
+        sound.playClick();
+        const virtualAllUnit = {
         id: 0,
         title: "All Units: Mixed Practice",
         titleTr: "Tüm Üniteler: Genel Tekrar",
@@ -233,14 +244,18 @@ class EnglishApp {
         words: MEB_UNITS.flatMap(u => u.words),
         expressions: MEB_UNITS.flatMap(u => u.expressions)
       };
-      this.selectUnit(virtualAllUnit);
-    });
+        this.selectUnit(virtualAllUnit);
+      });
+    } else {
+      allUnitsCard.classList.add('locked-unit');
+    }
 
     listContainer.appendChild(allUnitsCard);
 
     MEB_UNITS.forEach(unit => {
       const card = document.createElement('div');
       card.className = 'unit-card';
+      const isUnlocked = this.isUnitUnlocked(unit.id);
       
       // Ünitedeki öğrenilen kelime oranı
       const learnedCount = unit.words.filter(w => this.state.learnedWords[w.id]).length;
@@ -257,38 +272,68 @@ class EnglishApp {
             <div class="unit-progress-fill" style="width: ${progressPercent}%;"></div>
           </div>
           <div class="unit-meta">
-            <span class="unit-badge">${progressPercent}% Tamamlandı</span>
+            <span class="unit-badge">${isUnlocked ? `${progressPercent}% Tamamlandı` : '🔒 Önce önceki ünite testi'}</span>
             ${learnedCount > 0 ? `<span>⭐ ${learnedCount} kelime biliniyor</span>` : ''}
           </div>
         </div>
       `;
 
-      card.addEventListener('click', () => {
-        sound.playClick();
-        this.selectUnit(unit);
-      });
+      if (isUnlocked) {
+        card.addEventListener('click', () => {
+          sound.playClick();
+          this.selectUnit(unit);
+        });
+      } else {
+        card.classList.add('locked-unit');
+      }
 
       listContainer.appendChild(card);
     });
   }
 
   // ---------------- 5'ERLİ ADIM (STAGE) YÖNETİMİ ----------------
-  getUnlockedStage(unitId) {
-    if (this.state.allStagesUnlocked) return 999;
-    return (this.state.unitStages && this.state.unitStages[unitId]) || 1;
+  isUnitUnlocked(unitId) {
+    return unitId === 1 || Boolean(this.state.unitTests[unitId - 1]?.completed);
   }
 
-  unlockNextStage(unitId) {
-    if (!this.currentUnit || this.currentUnit.id === 0) return false;
-    if (!this.state.unitStages) this.state.unitStages = {};
-    const totalStages = Math.ceil(this.currentUnit.words.length / 5);
-    const curUnlocked = this.state.unitStages[unitId] || 1;
-    if (curUnlocked < totalStages) {
-      this.state.unitStages[unitId] = curUnlocked + 1;
-      this.saveState();
-      return true;
+  getStageProgress(unitId, stageNo) {
+    return this.state.stageProgress[unitId]?.[stageNo] || {};
+  }
+
+  getRequiredActivities() {
+    return ['flashcards', 'quiz', 'match', 'spelling', 'listening', 'truefalse'];
+  }
+
+  isStageComplete(unitId, stageNo) {
+    const progress = this.getStageProgress(unitId, stageNo);
+    return this.getRequiredActivities().every(activity => progress[activity]);
+  }
+
+  getUnlockedStage(unitId) {
+    const unit = MEB_UNITS.find(item => item.id === unitId) || this.currentUnit;
+    if (!unit || unit.id === 0) return 1;
+    const totalStages = Math.ceil(unit.words.length / 5);
+    for (let stage = 1; stage <= totalStages; stage++) {
+      if (!this.isStageComplete(unitId, stage)) return stage;
     }
-    return false;
+    return totalStages;
+  }
+
+  markActivityComplete(activity) {
+    if (!this.currentUnit || this.currentUnit.id === 0 || this.isUnitTest) return;
+    const unitId = this.currentUnit.id;
+    const stage = Number(this.currentStage);
+    if (!stage) return;
+    if (!this.state.stageProgress[unitId]) this.state.stageProgress[unitId] = {};
+    if (!this.state.stageProgress[unitId][stage]) this.state.stageProgress[unitId][stage] = {};
+    this.state.stageProgress[unitId][stage][activity] = true;
+    this.saveState();
+
+    const totalStages = Math.ceil(this.currentUnit.words.length / 5);
+    if (this.isStageComplete(unitId, stage) && stage < totalStages) {
+      this.currentStage = stage + 1;
+    }
+
   }
 
   getActiveWords() {
@@ -318,22 +363,10 @@ class EnglishApp {
     const totalStages = Math.ceil(totalWords / 5);
     const unlocked = this.getUnlockedStage(this.currentUnit.id);
 
-    // Toggle butonu
-    const toggleBtn = document.getElementById('btn-toggle-all-words');
-    if (toggleBtn) {
-      toggleBtn.textContent = this.state.allStagesUnlocked ? 'Kademeli Mod 🔒' : 'Tümünü Aç 🔓';
-      toggleBtn.onclick = () => {
-        sound.playClick();
-        this.state.allStagesUnlocked = !this.state.allStagesUnlocked;
-        this.saveState();
-        this.renderStagePills();
-      };
-    }
-
     for (let s = 1; s <= totalStages; s++) {
       const startWord = (s - 1) * 5 + 1;
       const endWord = (s === totalStages) ? totalWords : s * 5;
-      const isCompleted = s < unlocked;
+      const isCompleted = this.isStageComplete(this.currentUnit.id, s);
       const isLocked = s > unlocked;
       const isActive = this.currentStage === s;
 
@@ -364,29 +397,6 @@ class EnglishApp {
       container.appendChild(pill);
     }
 
-    // Tüm Kelimeler Pilli
-    const allPill = document.createElement('div');
-    const isAllActive = this.currentStage === 'all';
-    const isAllUnlocked = unlocked >= totalStages || this.state.allStagesUnlocked;
-    allPill.className = `stage-pill ${isAllActive ? 'active' : ''} ${!isAllUnlocked ? 'locked' : ''}`;
-    allPill.innerHTML = `
-      <span class="stage-pill-icon">🌟</span>
-      <div class="stage-pill-text">
-        <div class="stage-pill-name">Tüm Kelimeler</div>
-        <div class="stage-pill-range">Genel Tekrar (${totalWords})</div>
-      </div>
-    `;
-
-    if (isAllUnlocked) {
-      allPill.onclick = () => {
-        sound.playClick();
-        this.currentStage = 'all';
-        this.updateActiveStageUI();
-        this.renderStagePills();
-      };
-    }
-    container.appendChild(allPill);
-
     this.updateActiveStageUI();
   }
 
@@ -399,7 +409,9 @@ class EnglishApp {
       if (this.currentStage === 'all' || !this.currentUnit || this.currentUnit.id === 0) {
         labelEl.textContent = '📍 Seçili: Tüm Kelimeler (Genel Tekrar)';
       } else {
-        labelEl.textContent = `📍 Seçili: ${this.currentStage}. Adım (${activeWords.length} Kelime)`;
+        const progress = this.getStageProgress(this.currentUnit.id, this.currentStage);
+        const completed = this.getRequiredActivities().filter(activity => progress[activity]).length;
+        labelEl.textContent = `📍 Seçili: ${this.currentStage}. Adım (${activeWords.length} Kelime • ${completed}/6 çalışma)`;
       }
     }
     if (countEl) countEl.textContent = `${activeWords.length} Kelime`;
@@ -407,6 +419,7 @@ class EnglishApp {
 
   selectUnit(unit) {
     this.currentUnit = unit;
+    if (unit.id !== 0 && !this.isUnitUnlocked(unit.id)) return;
     const unlocked = this.getUnlockedStage(unit.id);
     const totalStages = Math.ceil(unit.words.length / 5);
     this.currentStage = Math.min(unlocked, totalStages);
@@ -436,6 +449,8 @@ class EnglishApp {
     this.setupGameTile('game-tile-truefalse', () => this.startTrueFalse());
     this.setupGameTile('game-tile-listen', () => this.startListening());
     this.setupGameTile('game-tile-expressions', () => this.startExpressions());
+    this.setupGameTile('game-tile-unit-test', () => this.startUnitTest());
+    this.updateGameTiles();
 
     this.showScreen('screen-unit-detail');
   }
@@ -445,13 +460,35 @@ class EnglishApp {
     if (el) {
       el.onclick = () => {
         sound.playClick();
+        if (el.classList.contains('locked')) return;
         callback();
       };
     }
   }
 
+  updateGameTiles() {
+    if (!this.currentUnit || this.currentUnit.id === 0) return;
+    const activities = {
+      'game-tile-cards': 'flashcards', 'game-tile-quiz': 'quiz', 'game-tile-match': 'match',
+      'game-tile-spelling': 'spelling', 'game-tile-listen': 'listening', 'game-tile-truefalse': 'truefalse'
+    };
+    const progress = this.getStageProgress(this.currentUnit.id, this.currentStage);
+    Object.entries(activities).forEach(([id, activity]) => {
+      const tile = document.getElementById(id);
+      tile?.classList.toggle('game-complete', Boolean(progress[activity]));
+      // The words must be studied on cards before the practice games begin.
+      tile?.classList.toggle('locked', activity !== 'flashcards' && !progress.flashcards);
+    });
+    const totalStages = Math.ceil(this.currentUnit.words.length / 5);
+    const testTile = document.getElementById('game-tile-unit-test');
+    const readyForTest = this.isStageComplete(this.currentUnit.id, totalStages);
+    testTile?.classList.toggle('locked', !readyForTest);
+    testTile?.classList.toggle('game-complete', Boolean(this.state.unitTests[this.currentUnit.id]?.completed));
+  }
+
   // ---------------- 2. FLASHCARD OYUNU (5 KELİMELİK AŞAMALAR) ----------------
   startFlashcards() {
+    this.isUnitTest = false;
     this.cardIndex = 0;
     this.activeWords = this.getActiveWords();
     this.showScreen('screen-game-flashcards');
@@ -481,10 +518,11 @@ class EnglishApp {
       if (this.cardIndex < this.activeWords.length - 1) {
         this.cardIndex++;
         this.renderCurrentCard();
-      } else {
-        // Bu 5 kelime tamamlandı!
-        this.unlockNextStage(this.currentUnit.id);
+      } else if (this.activeWords.every(word => this.state.learnedWords[word.id])) {
+        this.markActivityComplete('flashcards');
         this.showStageCompletedModal();
+      } else {
+        this.showCelebrationModal('Biraz Daha Çalışalım', 'Bu grubun tüm kelimelerinde “Öğrendim”e dokununca kartlar tamamlanır.', 1);
       }
     };
 
@@ -529,29 +567,15 @@ class EnglishApp {
     };
 
     const nextStepBtn = document.getElementById('btn-stage-next-step');
-    const totalStages = Math.ceil(this.currentUnit.words.length / 5);
-    const hasNext = typeof this.currentStage === 'number' && this.currentStage < totalStages;
-
-    if (hasNext) {
-      nextStepBtn.style.display = 'block';
-      nextStepBtn.textContent = `➡️ ${this.currentStage + 1}. Adımın Kelimelerine Geç`;
-      nextStepBtn.onclick = () => {
-        sound.playClick();
-        modal.classList.remove('active');
-        this.currentStage++;
-        this.renderStagePills();
-        this.startFlashcards();
-      };
-    } else {
-      nextStepBtn.style.display = 'block';
-      nextStepBtn.textContent = `🌟 Ünite Menüsüne Dön`;
-      nextStepBtn.onclick = () => {
-        sound.playClick();
-        modal.classList.remove('active');
-        this.showScreen('screen-unit-detail');
-        this.renderStagePills();
-      };
-    }
+    nextStepBtn.style.display = 'block';
+    nextStepBtn.textContent = '⬅️ Oyunları Seç';
+    nextStepBtn.onclick = () => {
+      sound.playClick();
+      modal.classList.remove('active');
+      this.showScreen('screen-unit-detail');
+      this.renderStagePills();
+      this.updateGameTiles();
+    };
   }
 
   renderCurrentCard() {
@@ -605,6 +629,7 @@ class EnglishApp {
 
   // ---------------- 3. ÇOKTAN SEÇMELİ TEST (QUIZ) ----------------
   startQuiz() {
+    this.isUnitTest = false;
     this.quizIndex = 0;
     this.quizScore = 0;
     
@@ -629,17 +654,54 @@ class EnglishApp {
     };
   }
 
+  startUnitTest() {
+    if (!this.currentUnit || this.currentUnit.id === 0) return;
+    const totalStages = Math.ceil(this.currentUnit.words.length / 5);
+    if (!this.isStageComplete(this.currentUnit.id, totalStages)) {
+      this.showCelebrationModal('Ünite Testi Henüz Kilitli', 'Önce her 5 kelimelik gruptaki kartları ve tüm oyunları tamamla.', 1);
+      return;
+    }
+
+    this.isUnitTest = true;
+    this.quizIndex = 0;
+    this.quizScore = 0;
+    const allWords = [...this.currentUnit.words].sort(() => 0.5 - Math.random());
+    this.quizQuestions = allWords.map(targetWord => {
+      const wrongOptions = this.currentUnit.words
+        .filter(word => word.id !== targetWord.id)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3);
+      return { target: targetWord, choices: [targetWord, ...wrongOptions].sort(() => 0.5 - Math.random()) };
+    });
+
+    this.showScreen('screen-game-quiz');
+    this.renderQuizQuestion();
+    document.getElementById('btn-exit-quiz').onclick = () => {
+      sound.playClick();
+      this.isUnitTest = false;
+      this.showScreen('screen-unit-detail');
+      this.renderStagePills();
+      this.updateGameTiles();
+    };
+  }
+
   renderQuizQuestion() {
     if (this.quizIndex >= this.quizQuestions.length) {
       const isPerfect = this.quizScore === this.quizQuestions.length;
       if (isPerfect) this.state.perfectQuizzes++;
       this.addStar(this.quizScore);
-      if (this.quizScore >= Math.ceil(this.quizQuestions.length * 0.6)) {
-        this.unlockNextStage(this.currentUnit.id);
+      if (this.isUnitTest) {
+        this.state.unitTests[this.currentUnit.id] = { completed: true, score: this.quizScore };
+        this.saveState();
+        this.renderUnitsList();
+      } else {
+        this.markActivityComplete('quiz');
       }
       this.showCelebrationModal(
-        isPerfect ? "Mükemmel! 🌟" : "Tebrikler! 🎉",
-        `${this.quizQuestions.length} sorudan ${this.quizScore} tanesini doğru bildin!`,
+        this.isUnitTest ? 'Ünite Testi Tamamlandı! 🏆' : (isPerfect ? "Mükemmel! 🌟" : "Tebrikler! 🎉"),
+        this.isUnitTest
+          ? `Ünitedeki ${this.quizQuestions.length} kelimenin tamamını test ettin. Sıradaki ünite artık açık!`
+          : `${this.quizQuestions.length} sorudan ${this.quizScore} tanesini doğru bildin!`,
         this.quizScore
       );
       return;
@@ -689,6 +751,7 @@ class EnglishApp {
 
   // ---------------- 4. KELİME EŞLEŞTİRME (MEMORY & MATCH) ----------------
   startMatch() {
+    this.isUnitTest = false;
     this.matchSelected = null;
     this.matchedPairsCount = 0;
 
@@ -755,7 +818,7 @@ class EnglishApp {
         if (this.matchedPairsCount === this.matchTargetCount) {
           this.state.matchesCompleted++;
           this.addStar(this.matchTargetCount);
-          this.unlockNextStage(this.currentUnit.id);
+          this.markActivityComplete('match');
           setTimeout(() => {
             this.showCelebrationModal("Müthişsin! 🧠", "Tüm kelimeleri hatasız eşleştirdin!", this.matchTargetCount);
           }, 600);
@@ -774,6 +837,7 @@ class EnglishApp {
 
   // ---------------- 5. HARF TAMAMLAMA (SPELLING BEE) ----------------
   startSpelling() {
+    this.isUnitTest = false;
     const activeWords = this.getActiveWords();
     this.spellingWordsPool = [...activeWords].sort(() => 0.5 - Math.random());
     this.spellingWordIndex = 0;
@@ -799,7 +863,7 @@ class EnglishApp {
 
   renderSpellingRound() {
     if (this.spellingWordIndex >= this.spellingWordsPool.length) {
-      this.unlockNextStage(this.currentUnit.id);
+      this.markActivityComplete('spelling');
       this.showCelebrationModal("Harika Yazdın! ✍️", `${this.spellingWordsPool.length} kelimeyi de doğru harflerle tamamladın!`, this.spellingWordsPool.length);
       return;
     }
@@ -932,6 +996,7 @@ class EnglishApp {
 
   // ---------------- 6. DOĞRU MU YANLIŞ MI (TRUE OR FALSE) ----------------
   startTrueFalse() {
+    this.isUnitTest = false;
     this.tfIndex = 0;
     this.tfScore = 0;
 
@@ -967,9 +1032,7 @@ class EnglishApp {
   renderTrueFalseCard() {
     if (this.tfIndex >= this.tfQuestions.length) {
       this.addStar(this.tfScore);
-      if (this.tfScore >= Math.ceil(this.tfQuestions.length * 0.6)) {
-        this.unlockNextStage(this.currentUnit.id);
-      }
+      this.markActivityComplete('truefalse');
       this.showCelebrationModal("Tebrikler! ⚡", `${this.tfQuestions.length} sorudan ${this.tfScore} tanesini doğru bildin!`, this.tfScore);
       return;
     }
@@ -1000,6 +1063,7 @@ class EnglishApp {
 
   // ---------------- 7. DİNLE VE BUL (LISTENING CHALLENGE) ----------------
   startListening() {
+    this.isUnitTest = false;
     this.listenIndex = 0;
     this.listenScore = 0;
 
@@ -1025,9 +1089,7 @@ class EnglishApp {
     if (this.listenIndex >= this.listenQuestions.length) {
       this.state.listeningCorrect += this.listenScore;
       this.addStar(this.listenScore);
-      if (this.listenScore >= Math.ceil(this.listenQuestions.length * 0.6)) {
-        this.unlockNextStage(this.currentUnit.id);
-      }
+      this.markActivityComplete('listening');
       this.showCelebrationModal("Harika Kulak! 🎧", `${this.listenQuestions.length} kelimeden ${this.listenScore} tanesini sesinden tanıdın!`, this.listenScore);
       return;
     }
@@ -1130,6 +1192,8 @@ class EnglishApp {
       sound.playClick();
       modal.classList.remove('active');
       this.showScreen('screen-unit-detail');
+      this.renderStagePills();
+      this.updateGameTiles();
     };
   }
 

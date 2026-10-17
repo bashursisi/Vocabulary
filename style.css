@@ -396,6 +396,14 @@ body {
   gap: 6px;
 }
 
+.stepper-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-align: right;
+  max-width: 155px;
+}
+
 .stepper-mode-toggle {
   font-size: 11px;
   color: var(--primary);
@@ -512,6 +520,42 @@ body {
 .game-tile:active {
   transform: scale(0.96);
   border-color: var(--primary);
+}
+
+.game-tile.game-complete {
+  border-color: var(--success);
+  background: var(--success-light);
+}
+
+.game-tile.game-complete::after {
+  content: '✓ Tamamlandı';
+  margin-top: 8px;
+  font-size: 11px;
+  color: #047857;
+  font-weight: 800;
+}
+
+.game-tile.locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.game-tile.locked::after {
+  content: '🔒 Kilitli';
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.game-tile.game-complete.locked::after {
+  content: '✓ Tamamlandı';
+  color: #047857;
+}
+
+.locked-unit {
+  opacity: 0.58;
+  cursor: not-allowed;
 }
 
 .game-tile-icon {

@@ -8,9 +8,9 @@ Bu uygulama; Türkiye'deki **7. sınıf İngilizce müfredatına** uygun olarak,
 
 ### 🎯 1. 5'er Kelimelik Kademeli Öğrenme Sistemi (Chunking)
 * **Adım Adım İlerleme (Level Sistemi):** Her ünitedeki 20 kelime aynı anda öğrenciye yığılmaz. Önce sadece **1. Adım (İlk 5 Kelime)** açılır.
-* **Hemen Oyunla Pekiştirme:** Öğrenci 5 kelimenin kartını tamamladığında, sistem hemen bu 5 kelimeye özel mini oyunlar (Test, Eşleştirme, Harf Tamamlama) sunar.
-* **Başardıkça Yeni Seviyenin Açılması:** 1. Adımı pekiştirip yıldız kazanınca **2. Adım (6-10. Kelimeler)** kilidi açılır!
-* **Büyük Final (Genel Tekrar):** Tüm adımlar bitince veya öğretmen dilerse "Tümünü Aç" butonuyla tüm kelimelerle karma meydan okuma yapılabilir.
+* **Önce Kartlar, Sonra Oyunlar:** Öğrenci önce o grubun 5 kelimesini kartlarda öğrenir. Ardından Test, Eşleştirme, Harf Tamamlama, Dinle ve Bul ve Doğru mu? oyunları açılır.
+* **Tüm Oyunlar Bitince Yeni Grup:** Bir sonraki 5 kelime, önceki 5 kelimelik grubun tüm oyunları tamamlanınca otomatik açılır.
+* **Ünite Sonu Testi:** Dört grup da tamamlanınca, ünitedeki 20 kelimenin tamamını kapsayan test açılır. Testten sonra sıradaki ünite açılır.
 
 ### 🧠 2. Epilepsi ve Dikkat Dostu Tasarım
 * **Sıfır Flaş & Sakin Renkler:** Ani parlayan ışıklar, titreşen/yanıp sönen animasyonlar ve sarsıcı geçişler kesinlikle bulunmaz. Pastel ve gözü dinlendiren tonlar seçilmiştir.

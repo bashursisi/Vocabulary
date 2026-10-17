@@ -97,7 +97,7 @@
         <div class="stage-stepper-box">
           <div class="stepper-header">
             <span class="stepper-title">🎯 5'er Kelimelik Öğrenme Adımları</span>
-            <button class="stepper-mode-toggle" id="btn-toggle-all-words">Tümünü Aç 🔓</button>
+            <span class="stepper-hint">Kartlar + tüm oyunlar bitince açılır</span>
           </div>
           <div class="stage-pills-row" id="stage-pills-container">
             <!-- Adım butonları JavaScript ile dinamik gelecek -->
@@ -154,6 +154,13 @@
             <span class="game-tile-icon">⚡</span>
             <div class="game-tile-title">Doğru mu?</div>
             <div class="game-tile-desc">Hızlı ve rahat seçim</div>
+          </div>
+
+          <!-- Ünite Finali -->
+          <div class="game-tile unit-test-tile locked" id="game-tile-unit-test">
+            <span class="game-tile-icon">🏆</span>
+            <div class="game-tile-title">Ünite Sonu Testi</div>
+            <div class="game-tile-desc">Tüm kelimeleri bitirince açılır</div>
           </div>
 
           <!-- Oyun 7: Günlük Kalıplar & Diyaloglar -->
@@ -353,8 +360,8 @@
     <div class="modal-overlay" id="stage-completed-modal">
       <div class="modal-content">
         <div class="result-celebration-icon">🎯</div>
-        <h3 class="result-title" id="stage-modal-title">İlk 5 Kelimeyi Tamamladın!</h3>
-        <p class="result-desc" id="stage-modal-desc">Şimdi bu 5 kelimeyi oyunlarla pekiştirip yıldız toplayalım!</p>
+        <h3 class="result-title" id="stage-modal-title">İlk 5 Kelimeyi Öğrendin!</h3>
+        <p class="result-desc" id="stage-modal-desc">Yeni kelimeler açılmadan önce bu grubun bütün oyunlarını tamamla.</p>
         
         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
           <button class="btn-primary" id="btn-stage-play-quiz">
@@ -367,7 +374,7 @@
             ✍️ Harfleri Diz & Yaz
           </button>
           <button class="btn-secondary" id="btn-stage-next-step">
-            ➡️ Sıradaki 5 Kelimeye Geç
+            ⬅️ Oyunları Seç
           </button>
         </div>
       </div>
