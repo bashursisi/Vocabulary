@@ -6,7 +6,13 @@ Bu uygulama; Türkiye'deki **8. sınıf (LGS) İngilizce müfredatına** uygun o
 
 ## 🌟 Öne Çıkan Özellikler
 
-### 🧠 1. Epilepsi ve Dikkat Dostu Tasarım
+### 🎯 1. 5'er Kelimelik Kademeli Öğrenme Sistemi (Chunking)
+* **Adım Adım İlerleme (Level Sistemi):** Her ünitedeki 20 kelime aynı anda öğrenciye yığılmaz. Önce sadece **1. Adım (İlk 5 Kelime)** açılır.
+* **Hemen Oyunla Pekiştirme:** Öğrenci 5 kelimenin kartını tamamladığında, sistem hemen bu 5 kelimeye özel mini oyunlar (Test, Eşleştirme, Harf Tamamlama) sunar.
+* **Başardıkça Yeni Seviyenin Açılması:** 1. Adımı pekiştirip yıldız kazanınca **2. Adım (6-10. Kelimeler)** kilidi açılır!
+* **Büyük Final (Genel Tekrar):** Tüm adımlar bitince veya öğretmen dilerse "Tümünü Aç" butonuyla tüm kelimelerle karma meydan okuma yapılabilir.
+
+### 🧠 2. Epilepsi ve Dikkat Dostu Tasarım
 * **Sıfır Flaş & Sakin Renkler:** Ani parlayan ışıklar, titreşen/yanıp sönen animasyonlar ve sarsıcı geçişler kesinlikle bulunmaz. Pastel ve gözü dinlendiren tonlar seçilmiştir.
 * **🌿 Sakin Mod (Calm Mode):** Tek tuşla tüm hareketli animasyonları kapatabilme imkanı.
 * **🔍 Büyük Yazı Modu:** Küçük telefon ekranlarında rahat okuma için büyütülmüş yazı seçeneği.

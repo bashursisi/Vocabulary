@@ -32,6 +32,9 @@ class EnglishApp {
     this.listenQuestions = [];
     this.listenIndex = 0;
 
+    this.currentStage = 1; // 1, 2, 3, 4 veya 'all'
+    this.activeWords = [];
+
     this.initUI();
     this.applySettings();
     this.renderUnitsList();
@@ -47,6 +50,8 @@ class EnglishApp {
       wordsSpelled: 0,
       listeningCorrect: 0,
       learnedWords: {},
+      unitStages: {}, // unitId -> unlocked stage (1, 2, 3...)
+      allStagesUnlocked: false,
       calmMode: false,
       largeText: false,
       speechSpeed: 'slow' // Başlangıçta daha anlaşılır yavaş telaffuz
@@ -267,13 +272,151 @@ class EnglishApp {
     });
   }
 
+  // ---------------- 5'ERLİ ADIM (STAGE) YÖNETİMİ ----------------
+  getUnlockedStage(unitId) {
+    if (this.state.allStagesUnlocked) return 999;
+    return (this.state.unitStages && this.state.unitStages[unitId]) || 1;
+  }
+
+  unlockNextStage(unitId) {
+    if (!this.currentUnit || this.currentUnit.id === 0) return false;
+    if (!this.state.unitStages) this.state.unitStages = {};
+    const totalStages = Math.ceil(this.currentUnit.words.length / 5);
+    const curUnlocked = this.state.unitStages[unitId] || 1;
+    if (curUnlocked < totalStages) {
+      this.state.unitStages[unitId] = curUnlocked + 1;
+      this.saveState();
+      return true;
+    }
+    return false;
+  }
+
+  getActiveWords() {
+    if (!this.currentUnit) return [];
+    if (this.currentStage === 'all' || this.currentUnit.id === 0) {
+      return this.currentUnit.words;
+    }
+    const stageNum = parseInt(this.currentStage) || 1;
+    const start = (stageNum - 1) * 5;
+    const totalStages = Math.ceil(this.currentUnit.words.length / 5);
+    const end = (stageNum === totalStages) ? this.currentUnit.words.length : stageNum * 5;
+    const slice = this.currentUnit.words.slice(start, end);
+    return slice.length > 0 ? slice : this.currentUnit.words.slice(0, 5);
+  }
+
+  getStageLabel() {
+    if (this.currentStage === 'all' || !this.currentUnit || this.currentUnit.id === 0) return 'Tüm Kelimeler';
+    return `${this.currentStage}. Adım`;
+  }
+
+  renderStagePills() {
+    const container = document.getElementById('stage-pills-container');
+    if (!container || !this.currentUnit) return;
+    container.innerHTML = '';
+
+    const totalWords = this.currentUnit.words.length;
+    const totalStages = Math.ceil(totalWords / 5);
+    const unlocked = this.getUnlockedStage(this.currentUnit.id);
+
+    // Toggle butonu
+    const toggleBtn = document.getElementById('btn-toggle-all-words');
+    if (toggleBtn) {
+      toggleBtn.textContent = this.state.allStagesUnlocked ? 'Kademeli Mod 🔒' : 'Tümünü Aç 🔓';
+      toggleBtn.onclick = () => {
+        sound.playClick();
+        this.state.allStagesUnlocked = !this.state.allStagesUnlocked;
+        this.saveState();
+        this.renderStagePills();
+      };
+    }
+
+    for (let s = 1; s <= totalStages; s++) {
+      const startWord = (s - 1) * 5 + 1;
+      const endWord = (s === totalStages) ? totalWords : s * 5;
+      const isCompleted = s < unlocked;
+      const isLocked = s > unlocked;
+      const isActive = this.currentStage === s;
+
+      const pill = document.createElement('div');
+      pill.className = `stage-pill ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`;
+
+      let icon = '🎯';
+      if (isCompleted) icon = '✅';
+      else if (isLocked) icon = '🔒';
+
+      pill.innerHTML = `
+        <span class="stage-pill-icon">${icon}</span>
+        <div class="stage-pill-text">
+          <div class="stage-pill-name">${s}. Adım</div>
+          <div class="stage-pill-range">${startWord}-${endWord}. Kelimeler</div>
+        </div>
+      `;
+
+      if (!isLocked) {
+        pill.onclick = () => {
+          sound.playClick();
+          this.currentStage = s;
+          this.updateActiveStageUI();
+          this.renderStagePills();
+        };
+      }
+
+      container.appendChild(pill);
+    }
+
+    // Tüm Kelimeler Pilli
+    const allPill = document.createElement('div');
+    const isAllActive = this.currentStage === 'all';
+    const isAllUnlocked = unlocked >= totalStages || this.state.allStagesUnlocked;
+    allPill.className = `stage-pill ${isAllActive ? 'active' : ''} ${!isAllUnlocked ? 'locked' : ''}`;
+    allPill.innerHTML = `
+      <span class="stage-pill-icon">🌟</span>
+      <div class="stage-pill-text">
+        <div class="stage-pill-name">Tüm Kelimeler</div>
+        <div class="stage-pill-range">Genel Tekrar (${totalWords})</div>
+      </div>
+    `;
+
+    if (isAllUnlocked) {
+      allPill.onclick = () => {
+        sound.playClick();
+        this.currentStage = 'all';
+        this.updateActiveStageUI();
+        this.renderStagePills();
+      };
+    }
+    container.appendChild(allPill);
+
+    this.updateActiveStageUI();
+  }
+
+  updateActiveStageUI() {
+    const labelEl = document.getElementById('active-stage-label');
+    const countEl = document.getElementById('active-stage-word-count');
+    const activeWords = this.getActiveWords();
+
+    if (labelEl) {
+      if (this.currentStage === 'all' || !this.currentUnit || this.currentUnit.id === 0) {
+        labelEl.textContent = '📍 Seçili: Tüm Kelimeler (Genel Tekrar)';
+      } else {
+        labelEl.textContent = `📍 Seçili: ${this.currentStage}. Adım (${activeWords.length} Kelime)`;
+      }
+    }
+    if (countEl) countEl.textContent = `${activeWords.length} Kelime`;
+  }
+
   selectUnit(unit) {
     this.currentUnit = unit;
+    const unlocked = this.getUnlockedStage(unit.id);
+    const totalStages = Math.ceil(unit.words.length / 5);
+    this.currentStage = Math.min(unlocked, totalStages);
 
     // Ünite detay ekranını hazırla
     document.getElementById('detail-unit-title').textContent = unit.titleTr;
     document.getElementById('detail-unit-subtitle').textContent = unit.description;
     document.getElementById('detail-unit-icon').textContent = unit.icon;
+
+    this.renderStagePills();
 
     // Geri butonu
     const backBtn = document.getElementById('btn-back-to-units');
@@ -307,9 +450,10 @@ class EnglishApp {
     }
   }
 
-  // ---------------- 2. FLASHCARD OYUNU ----------------
+  // ---------------- 2. FLASHCARD OYUNU (5 KELİMELİK AŞAMALAR) ----------------
   startFlashcards() {
     this.cardIndex = 0;
+    this.activeWords = this.getActiveWords();
     this.showScreen('screen-game-flashcards');
     this.renderCurrentCard();
 
@@ -323,7 +467,7 @@ class EnglishApp {
 
     document.getElementById('btn-card-next').onclick = () => {
       sound.playClick();
-      if (this.cardIndex < this.currentUnit.words.length - 1) {
+      if (this.cardIndex < this.activeWords.length - 1) {
         this.cardIndex++;
         this.renderCurrentCard();
       }
@@ -331,29 +475,91 @@ class EnglishApp {
 
     document.getElementById('btn-card-learned').onclick = () => {
       sound.playSuccess();
-      const currentWord = this.currentUnit.words[this.cardIndex];
+      const currentWord = this.activeWords[this.cardIndex];
       this.markWordPracticed(currentWord.id);
       
-      if (this.cardIndex < this.currentUnit.words.length - 1) {
+      if (this.cardIndex < this.activeWords.length - 1) {
         this.cardIndex++;
         this.renderCurrentCard();
       } else {
-        this.showCelebrationModal("Harika İş!", "Bu ünitedeki tüm kartlara göz attın!", 3);
+        // Bu 5 kelime tamamlandı!
+        this.unlockNextStage(this.currentUnit.id);
+        this.showStageCompletedModal();
       }
     };
 
     document.getElementById('btn-exit-flashcards').onclick = () => {
       sound.playClick();
       this.showScreen('screen-unit-detail');
+      this.renderStagePills();
     };
   }
 
+  showStageCompletedModal() {
+    sound.playFanfare();
+    const modal = document.getElementById('stage-completed-modal');
+    if (!modal) {
+      this.showCelebrationModal("Harika İş!", "Bu aşamadaki tüm kartlara göz attın!", 3);
+      return;
+    }
+
+    const label = this.getStageLabel();
+    document.getElementById('stage-modal-title').textContent = `${label} Kelimelerini Öğrendin! 🎯`;
+    document.getElementById('stage-modal-desc').textContent = `Harika! Şimdi bu ${this.activeWords.length} kelimeyi oyunlarla pekiştirip yıldız toplayalım.`;
+
+    modal.classList.add('active');
+
+    // Butonları bağla
+    document.getElementById('btn-stage-play-quiz').onclick = () => {
+      sound.playClick();
+      modal.classList.remove('active');
+      this.startQuiz();
+    };
+
+    document.getElementById('btn-stage-play-match').onclick = () => {
+      sound.playClick();
+      modal.classList.remove('active');
+      this.startMatch();
+    };
+
+    document.getElementById('btn-stage-play-spelling').onclick = () => {
+      sound.playClick();
+      modal.classList.remove('active');
+      this.startSpelling();
+    };
+
+    const nextStepBtn = document.getElementById('btn-stage-next-step');
+    const totalStages = Math.ceil(this.currentUnit.words.length / 5);
+    const hasNext = typeof this.currentStage === 'number' && this.currentStage < totalStages;
+
+    if (hasNext) {
+      nextStepBtn.style.display = 'block';
+      nextStepBtn.textContent = `➡️ ${this.currentStage + 1}. Adımın Kelimelerine Geç`;
+      nextStepBtn.onclick = () => {
+        sound.playClick();
+        modal.classList.remove('active');
+        this.currentStage++;
+        this.renderStagePills();
+        this.startFlashcards();
+      };
+    } else {
+      nextStepBtn.style.display = 'block';
+      nextStepBtn.textContent = `🌟 Ünite Menüsüne Dön`;
+      nextStepBtn.onclick = () => {
+        sound.playClick();
+        modal.classList.remove('active');
+        this.showScreen('screen-unit-detail');
+        this.renderStagePills();
+      };
+    }
+  }
+
   renderCurrentCard() {
-    const word = this.currentUnit.words[this.cardIndex];
+    const word = this.activeWords[this.cardIndex];
     if (!word) return;
 
-    document.getElementById('flashcard-unit-badge').textContent = `${this.currentUnit.titleTr}`;
-    document.getElementById('flashcard-step-badge').textContent = `${this.cardIndex + 1} / ${this.currentUnit.words.length}`;
+    document.getElementById('flashcard-unit-badge').textContent = `${this.currentUnit.titleTr} • ${this.getStageLabel()}`;
+    document.getElementById('flashcard-step-badge').textContent = `Kelime ${this.cardIndex + 1} / ${this.activeWords.length}`;
     document.getElementById('flashcard-icon').textContent = word.icon || "📖";
     document.getElementById('flashcard-en-word').textContent = word.en;
     document.getElementById('flashcard-phonetic').textContent = `[ ${word.phonetic || ''} ]`;
@@ -402,12 +608,11 @@ class EnglishApp {
     this.quizIndex = 0;
     this.quizScore = 0;
     
-    // 5 soruluk test hazırla (dikkat süresi için kısa tutuldu)
-    const shuffledWords = [...this.currentUnit.words].sort(() => 0.5 - Math.random());
+    const activeWords = this.getActiveWords();
+    const shuffledWords = [...activeWords].sort(() => 0.5 - Math.random());
     const selectedWords = shuffledWords.slice(0, Math.min(6, shuffledWords.length));
 
     this.quizQuestions = selectedWords.map(targetWord => {
-      // 3 yanlış seçenek bul
       const wrongPool = this.currentUnit.words.filter(w => w.id !== targetWord.id);
       const wrongOptions = wrongPool.sort(() => 0.5 - Math.random()).slice(0, 3);
       const allChoices = [targetWord, ...wrongOptions].sort(() => 0.5 - Math.random());
@@ -420,15 +625,18 @@ class EnglishApp {
     document.getElementById('btn-exit-quiz').onclick = () => {
       sound.playClick();
       this.showScreen('screen-unit-detail');
+      this.renderStagePills();
     };
   }
 
   renderQuizQuestion() {
     if (this.quizIndex >= this.quizQuestions.length) {
-      // Test bitti
       const isPerfect = this.quizScore === this.quizQuestions.length;
       if (isPerfect) this.state.perfectQuizzes++;
       this.addStar(this.quizScore);
+      if (this.quizScore >= Math.ceil(this.quizQuestions.length * 0.6)) {
+        this.unlockNextStage(this.currentUnit.id);
+      }
       this.showCelebrationModal(
         isPerfect ? "Mükemmel! 🌟" : "Tebrikler! 🎉",
         `${this.quizQuestions.length} sorudan ${this.quizScore} tanesini doğru bildin!`,
@@ -441,10 +649,9 @@ class EnglishApp {
     document.getElementById('quiz-step-badge').textContent = `Soru ${this.quizIndex + 1} / ${this.quizQuestions.length}`;
     document.getElementById('quiz-word-display').textContent = q.target.en;
 
-    // Telaffuz butonu
     const audioBtn = document.getElementById('btn-quiz-audio');
     audioBtn.onclick = () => sound.speak(q.target.en);
-    sound.speak(q.target.en); // Soruyu açınca seslendir
+    sound.speak(q.target.en);
 
     const optionsContainer = document.getElementById('quiz-options-container');
     optionsContainer.innerHTML = '';
@@ -455,7 +662,6 @@ class EnglishApp {
       btn.innerHTML = `<span>${choice.icon || '🔹'} ${choice.tr}</span> <span>👉</span>`;
 
       btn.onclick = () => {
-        // Çift tıklamayı önle
         optionsContainer.querySelectorAll('button').forEach(b => b.style.pointerEvents = 'none');
 
         if (choice.id === q.target.id) {
@@ -466,7 +672,6 @@ class EnglishApp {
         } else {
           btn.classList.add('wrong');
           sound.playGentleTryAgain();
-          // Doğru olanı yeşil göster
           optionsContainer.querySelectorAll('button').forEach(b => {
             if (b.innerText.includes(q.target.tr)) b.classList.add('correct');
           });
@@ -487,8 +692,9 @@ class EnglishApp {
     this.matchSelected = null;
     this.matchedPairsCount = 0;
 
-    // 4 kelime seç (8 kart) - Aşırı bilişsel yük oluşturmamak için
-    const words = [...this.currentUnit.words].sort(() => 0.5 - Math.random()).slice(0, 4);
+    const activeWords = this.getActiveWords();
+    const words = [...activeWords].sort(() => 0.5 - Math.random()).slice(0, Math.min(4, activeWords.length));
+    this.matchTargetCount = words.length;
 
     const cards = [];
     words.forEach(w => {
@@ -496,7 +702,6 @@ class EnglishApp {
       cards.push({ id: w.id, type: 'tr', text: w.tr, audioText: w.en, icon: '🇹🇷' });
     });
 
-    // Kartları karıştır
     cards.sort(() => 0.5 - Math.random());
 
     this.showScreen('screen-game-match');
@@ -515,6 +720,7 @@ class EnglishApp {
     document.getElementById('btn-exit-match').onclick = () => {
       sound.playClick();
       this.showScreen('screen-unit-detail');
+      this.renderStagePills();
     };
   }
 
@@ -525,14 +731,11 @@ class EnglishApp {
     if (cardData.audioText) sound.speak(cardData.audioText);
 
     if (!this.matchSelected) {
-      // İlk kart seçildi
       this.matchSelected = { el: cardEl, data: cardData };
       cardEl.classList.add('selected');
     } else {
-      // İkinci kart seçildi
       const first = this.matchSelected;
 
-      // Aynı kart tipine mi tıkladı? (örn: iki İngilizce)
       if (first.data.type === cardData.type) {
         first.el.classList.remove('selected');
         this.matchSelected = { el: cardEl, data: cardData };
@@ -540,9 +743,7 @@ class EnglishApp {
         return;
       }
 
-      // Eşleşti mi?
       if (first.data.id === cardData.id) {
-        // DOĞRU EŞLEŞME
         sound.playSuccess();
         first.el.classList.remove('selected');
         first.el.classList.add('matched');
@@ -551,15 +752,15 @@ class EnglishApp {
         this.matchedPairsCount++;
         this.markWordPracticed(cardData.id);
 
-        if (this.matchedPairsCount === 4) {
+        if (this.matchedPairsCount === this.matchTargetCount) {
           this.state.matchesCompleted++;
-          this.addStar(4);
+          this.addStar(this.matchTargetCount);
+          this.unlockNextStage(this.currentUnit.id);
           setTimeout(() => {
-            this.showCelebrationModal("Müthişsin! 🧠", "Tüm kelimeleri hatasız eşleştirdin!", 4);
+            this.showCelebrationModal("Müthişsin! 🧠", "Tüm kelimeleri hatasız eşleştirdin!", this.matchTargetCount);
           }, 600);
         }
       } else {
-        // YANLIŞ EŞLEŞME
         cardEl.classList.add('selected');
         sound.playGentleTryAgain();
         setTimeout(() => {
@@ -573,7 +774,8 @@ class EnglishApp {
 
   // ---------------- 5. HARF TAMAMLAMA (SPELLING BEE) ----------------
   startSpelling() {
-    this.spellingWordsPool = [...this.currentUnit.words].sort(() => 0.5 - Math.random());
+    const activeWords = this.getActiveWords();
+    this.spellingWordsPool = [...activeWords].sort(() => 0.5 - Math.random());
     this.spellingWordIndex = 0;
     this.showScreen('screen-game-spelling');
     this.renderSpellingRound();
@@ -581,6 +783,7 @@ class EnglishApp {
     document.getElementById('btn-exit-spelling').onclick = () => {
       sound.playClick();
       this.showScreen('screen-unit-detail');
+      this.renderStagePills();
     };
 
     document.getElementById('btn-spell-clear').onclick = () => {
@@ -595,8 +798,9 @@ class EnglishApp {
   }
 
   renderSpellingRound() {
-    if (this.spellingWordIndex >= Math.min(5, this.spellingWordsPool.length)) {
-      this.showCelebrationModal("Harika Yazdın! ✍️", "5 kelimeyi de doğru harflerle tamamladın!", 5);
+    if (this.spellingWordIndex >= this.spellingWordsPool.length) {
+      this.unlockNextStage(this.currentUnit.id);
+      this.showCelebrationModal("Harika Yazdın! ✍️", `${this.spellingWordsPool.length} kelimeyi de doğru harflerle tamamladın!`, this.spellingWordsPool.length);
       return;
     }
 
@@ -605,10 +809,9 @@ class EnglishApp {
     this.targetLetters = cleanWord.split('');
     this.spellingEnteredLetters = [];
 
-    document.getElementById('spell-step-badge').textContent = `Kelime ${this.spellingWordIndex + 1} / 5`;
+    document.getElementById('spell-step-badge').textContent = `Kelime ${this.spellingWordIndex + 1} / ${this.spellingWordsPool.length}`;
     document.getElementById('spell-tr-clue').textContent = `${this.spellingCurrentWord.icon || '🎯'} ${this.spellingCurrentWord.tr}`;
 
-    // Ses butonu
     const audioBtn = document.getElementById('btn-spell-audio');
     audioBtn.onclick = () => sound.speak(this.spellingCurrentWord.en);
     sound.speak(this.spellingCurrentWord.en);
@@ -634,7 +837,6 @@ class EnglishApp {
     const kbRow = document.getElementById('spell-keyboard-row');
     kbRow.innerHTML = '';
 
-    // Harfleri karıştır
     const letters = [...this.targetLetters].sort(() => 0.5 - Math.random());
 
     letters.forEach((char, index) => {
@@ -664,7 +866,6 @@ class EnglishApp {
   }
 
   handleSlotClick(slotIndex) {
-    // Tıklanan son harfi geri al
     if (slotIndex === this.spellingEnteredLetters.length - 1 && this.spellingEnteredLetters.length > 0) {
       sound.playClick();
       const last = this.spellingEnteredLetters.pop();
@@ -734,7 +935,8 @@ class EnglishApp {
     this.tfIndex = 0;
     this.tfScore = 0;
 
-    const words = [...this.currentUnit.words].sort(() => 0.5 - Math.random()).slice(0, 6);
+    const activeWords = this.getActiveWords();
+    const words = [...activeWords].sort(() => 0.5 - Math.random()).slice(0, Math.min(6, activeWords.length));
     this.tfQuestions = words.map((targetWord, index) => {
       const isCorrectPair = Math.random() > 0.5;
       let displayTr = targetWord.tr;
@@ -758,12 +960,16 @@ class EnglishApp {
     document.getElementById('btn-exit-tf').onclick = () => {
       sound.playClick();
       this.showScreen('screen-unit-detail');
+      this.renderStagePills();
     };
   }
 
   renderTrueFalseCard() {
     if (this.tfIndex >= this.tfQuestions.length) {
       this.addStar(this.tfScore);
+      if (this.tfScore >= Math.ceil(this.tfQuestions.length * 0.6)) {
+        this.unlockNextStage(this.currentUnit.id);
+      }
       this.showCelebrationModal("Tebrikler! ⚡", `${this.tfQuestions.length} sorudan ${this.tfScore} tanesini doğru bildin!`, this.tfScore);
       return;
     }
@@ -797,7 +1003,8 @@ class EnglishApp {
     this.listenIndex = 0;
     this.listenScore = 0;
 
-    const words = [...this.currentUnit.words].sort(() => 0.5 - Math.random()).slice(0, 5);
+    const activeWords = this.getActiveWords();
+    const words = [...activeWords].sort(() => 0.5 - Math.random()).slice(0, Math.min(5, activeWords.length));
     this.listenQuestions = words.map(targetWord => {
       const wrong = this.currentUnit.words.filter(w => w.id !== targetWord.id).sort(() => 0.5 - Math.random()).slice(0, 3);
       const choices = [targetWord, ...wrong].sort(() => 0.5 - Math.random());
@@ -810,6 +1017,7 @@ class EnglishApp {
     document.getElementById('btn-exit-listen').onclick = () => {
       sound.playClick();
       this.showScreen('screen-unit-detail');
+      this.renderStagePills();
     };
   }
 
@@ -817,6 +1025,9 @@ class EnglishApp {
     if (this.listenIndex >= this.listenQuestions.length) {
       this.state.listeningCorrect += this.listenScore;
       this.addStar(this.listenScore);
+      if (this.listenScore >= Math.ceil(this.listenQuestions.length * 0.6)) {
+        this.unlockNextStage(this.currentUnit.id);
+      }
       this.showCelebrationModal("Harika Kulak! 🎧", `${this.listenQuestions.length} kelimeden ${this.listenScore} tanesini sesinden tanıdın!`, this.listenScore);
       return;
     }
@@ -824,14 +1035,12 @@ class EnglishApp {
     const q = this.listenQuestions[this.listenIndex];
     document.getElementById('listen-step-badge').textContent = `Soru ${this.listenIndex + 1} / ${this.listenQuestions.length}`;
 
-    // Ses butonu
     const speakerBtn = document.getElementById('btn-listen-play-big');
     speakerBtn.onclick = () => sound.speak(q.target.en);
 
     const slowSpeakerBtn = document.getElementById('btn-listen-play-slow');
     slowSpeakerBtn.onclick = () => sound.speak(q.target.en, 0.65);
 
-    // Otomatik ilk telaffuz
     setTimeout(() => sound.speak(q.target.en), 300);
 
     const container = document.getElementById('listen-options-container');

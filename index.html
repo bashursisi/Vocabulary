@@ -93,6 +93,22 @@
           </div>
         </div>
 
+        <!-- 5'ER KELİMELİK ÖĞRENME ADIMLARI -->
+        <div class="stage-stepper-box">
+          <div class="stepper-header">
+            <span class="stepper-title">🎯 5'er Kelimelik Öğrenme Adımları</span>
+            <button class="stepper-mode-toggle" id="btn-toggle-all-words">Tümünü Aç 🔓</button>
+          </div>
+          <div class="stage-pills-row" id="stage-pills-container">
+            <!-- Adım butonları JavaScript ile dinamik gelecek -->
+          </div>
+        </div>
+
+        <div class="active-stage-banner">
+          <span id="active-stage-label">📍 Seçili: 1. Adım (İlk 5 Kelime)</span>
+          <span id="active-stage-word-count">5 Kelime</span>
+        </div>
+
         <h3 class="section-title" style="font-size: 16px; margin-bottom: 10px;">Nasıl Çalışmak İstersin?</h3>
 
         <div class="games-grid">
@@ -332,6 +348,30 @@
       </section>
 
     </main>
+
+    <!-- 5 KELİME TAMAMLANDI - OYUN SEÇİM MODALI -->
+    <div class="modal-overlay" id="stage-completed-modal">
+      <div class="modal-content">
+        <div class="result-celebration-icon">🎯</div>
+        <h3 class="result-title" id="stage-modal-title">İlk 5 Kelimeyi Tamamladın!</h3>
+        <p class="result-desc" id="stage-modal-desc">Şimdi bu 5 kelimeyi oyunlarla pekiştirip yıldız toplayalım!</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+          <button class="btn-primary" id="btn-stage-play-quiz">
+            🎯 5 Kelimelik Teste Başla
+          </button>
+          <button class="btn-primary" id="btn-stage-play-match" style="background: #10B981;">
+            🧩 Eşleştirme Oyna
+          </button>
+          <button class="btn-primary" id="btn-stage-play-spelling" style="background: #8B5CF6;">
+            ✍️ Harfleri Diz & Yaz
+          </button>
+          <button class="btn-secondary" id="btn-stage-next-step">
+            ➡️ Sıradaki 5 Kelimeye Geç
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- KUTLAMA MODALI -->
     <div class="modal-overlay" id="celebration-modal">
