@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#grad)"/>
+  <!-- Star -->
+  <polygon points="256,70 290,170 395,170 310,235 345,340 256,275 167,340 202,235 117,170 222,170" fill="#FBBF24"/>
+  <!-- Book Base -->
+  <path d="M120 370 C 180 340, 240 340, 256 360 C 272 340, 332 340, 392 370 L 392 430 C 332 400, 272 400, 256 420 C 240 400, 180 400, 120 430 Z" fill="#FFFFFF"/>
+</svg>
